@@ -1,0 +1,110 @@
+# Shrey's financial profile: the template.
+# The real one lives at finance/private/profile.yaml, which git ignores. Run /onboard to fill it in.
+# Annual amounts unless the key says monthly. Rupees. Leave anything unknown blank.
+# Never store PAN, Aadhaar, bank or demat account numbers, card numbers, or passwords here.
+
+as_of:                        # YYYY-MM-DD of the last update
+
+personal:
+  age:
+  residential_status: resident   # resident | rnor | nri
+  city:
+  metro_for_hra: false           # Delhi, Mumbai, Kolkata, Chennai (+ Bengaluru, Hyderabad, Pune, Ahmedabad from FY 2026-27)
+  marital_status:
+  dependents: []                 # - {relation: mother, age: 62, depends_on_me: true}
+  risk_appetite:                 # conservative | moderate | aggressive
+  investing_experience:          # none | some | experienced
+
+income:
+  employment: salaried           # salaried | freelancer | business | mixed
+  employer:
+  salary:
+    gross_annual:                # CTC minus employer PF and gratuity, roughly Form 16 gross
+    basic_da:
+    hra:
+    employer_nps:
+    variable_bonus:
+    professional_tax:
+  freelance_or_business:
+    gross_receipts:
+    presumptive_scheme:          # 44ADA | 44AD | none
+  other:
+    savings_interest:
+    fd_interest:
+    dividends:
+    rental_income:
+    other:
+
+tax:
+  regime_this_year:              # new | old
+  regime_declared_to_employer:
+  tds_expected_this_year:
+  advance_tax_paid: []           # - {date: 2026-09-15, amount: 25000}
+  last_itr:
+    fy:                          # e.g. 2025-26
+    form:                        # ITR-1 | ITR-2 | ITR-3 | ITR-4
+    filed_on:
+    refund_or_demand:
+  carried_forward_losses: []     # - {fy: 2024-25, type: STCL, amount: 40000}
+  open_notices: []
+
+monthly:
+  take_home:
+  household_expenses:
+  rent_paid:
+  sip_investments:
+  other_savings:
+
+loans: []                        # - {type: home, outstanding: , rate_pct: , emi: , months_left: }
+
+assets:
+  bank_and_fd:
+  emergency_fund:                # money set aside only for emergencies
+  epf:
+  ppf:
+  nps:
+  mutual_funds:
+    equity:
+    debt:
+    hybrid_or_other:
+  direct_stocks:
+  gold:                          # physical, SGB, ETF
+  real_estate: []                # - {use: self_occupied, value: , bought: 2019-04-01, cost: }
+  foreign_assets: []             # RSUs/ESOPs of a foreign employer, foreign accounts (Schedule FA)
+  other:
+
+insurance:
+  term_life_cover:
+  health:
+    personal_base_cover:
+    super_top_up:
+    employer_group_cover:
+    parents_cover:
+  other_policies: []             # endowment / ULIP / money-back: {premium: , maturity_year: , sum_assured: }
+
+goals: []
+  # - {name: Emergency fund, target_today: , by_year: , priority: high}
+  # - {name: Home down payment, target_today: , by_year: , priority: medium}
+  # - {name: Retirement, retire_at_age: 55, monthly_expenses_today: }
+
+old_regime_items:                # what you would claim anyway if you chose the old regime
+  80c:
+    employee_epf:
+    ppf:
+    elss:
+    life_insurance_premium:
+    home_loan_principal:
+    children_tuition:
+  80ccd_1b_nps:
+  80d_self_family:
+  80d_parents:
+  parents_senior: false
+  home_loan_interest_self_occupied:
+  education_loan_interest:
+  donations_80g:
+
+estate:
+  nominations_updated:           # bank, demat, MF, EPF, insurance
+  will:
+
+notes: []                        # anything the advisor should remember

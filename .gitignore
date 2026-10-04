@@ -1,0 +1,14 @@
+# Personal financial data never goes into git: this repository is public.
+finance/private/*
+!finance/private/README.md
+
+# Statements and tax documents dropped anywhere under finance/
+finance/**/*.pdf
+finance/**/*.xls
+finance/**/*.xlsx
+finance/**/*.csv
+finance/**/*.zip
+
+.env
+__pycache__/
+*.pyc
