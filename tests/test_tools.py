@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 from advance_tax import schedule  # noqa: E402
 from capital_gains import analyse  # noqa: E402
 from fmt import inr  # noqa: E402
-from income_tax import TaxInput, breakeven_extra_deductions, compare, compute, hra_exemption  # noqa: E402
+from income_tax import TaxInput, breakeven_extra_deductions, compare, compute, hra_exemption, round_tax  # noqa: E402
 from planner import emi_plan, real_return, sip_future_value, xirr  # noqa: E402
 
 
@@ -74,6 +74,11 @@ class OldRegime(unittest.TestCase):
         self.assertEqual(result["income_from_house_property"], -200_000)
         self.assertEqual(result["deductions"]["80C"], 150_000)
         self.assertEqual(result["deductions"]["80D health insurance"], 25_000)
+
+    def test_rounding_288b(self):
+        self.assertEqual(round_tax(225265.0), 225270)  # 5 rounds up, not to even
+        self.assertEqual(round_tax(225264.99), 225260)  # paise are dropped first
+        self.assertEqual(round_tax(225255.4), 225260)
 
     def test_hra_formula(self):
         self.assertEqual(hra_exemption(600_000, 240_000, 180_000, metro=False), 120_000)

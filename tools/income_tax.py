@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from dataclasses import asdict, dataclass, fields
 
@@ -98,6 +99,12 @@ def surcharge_rate(total_income: float, table) -> float:
         if total_income > threshold:
             rate = r
     return rate
+
+
+def round_tax(amount: float) -> int:
+    """Section 288B: drop the paise, then round to the nearest 10, with 5 rounding up."""
+    rupees = math.floor(amount + 1e-6)
+    return (rupees + 5) // 10 * 10
 
 
 def hra_exemption(basic_da: float, hra_received: float, rent_paid: float, metro: bool) -> float:
@@ -293,7 +300,7 @@ def compute(inp: TaxInput, regime: str, with_marginal_rate: bool = True) -> dict
     surcharge = res["surcharge"] - surcharge_relief
     tax_after_rebate = res["normal_tax"] + res["special_tax"] - res["rebate"]
     cess = (tax_after_rebate + surcharge) * rules["cess"]
-    total_tax = round((tax_after_rebate + surcharge + cess) / 10) * 10  # rounded to nearest 10
+    total_tax = round_tax(tax_after_rebate + surcharge + cess)
 
     # Measured, not looked up, so rebate and surcharge marginal relief show through.
     marginal = None
