@@ -1,0 +1,51 @@
+# How Shrey likes things done: Donna's template.
+# The real file lives at secretary/private/preferences.yaml, which git ignores. Run /donna-setup to fill it in.
+# Never store passwords, OTPs, PINs, or card, bank, PAN, Aadhaar or passport numbers here.
+
+as_of:                          # YYYY-MM-DD of the last update
+
+basics:
+  name: Shrey
+  timezone: Asia/Kolkata        # IANA name; pass it to tools/when.py --tz if it isn't Asia/Kolkata
+  city:
+  working_days: [Mon, Tue, Wed, Thu, Fri]
+  working_hours: "09:30-18:30"
+  languages: [English]
+
+meetings:
+  default_minutes: 30
+  preferred_times: []           # e.g. ["11:00-13:00", "15:00-17:00"]
+  no_meetings: []               # e.g. ["Mon 09:30-11:00", "Fri after 16:00"]
+  focus_blocks: []              # e.g. ["Tue 10:00-12:00"], protected like meetings
+  max_per_day: 5
+  buffer_minutes: 10            # gap between back-to-back meetings
+  travel_buffer_minutes: 30     # either side of an in-person meeting
+  video: Google Meet            # Google Meet | Zoom | Teams
+
+vips: []                        # - {name: , email: , why: manager}  their mail and meetings come first
+
+writing:
+  tone: warm, direct, brief
+  sign_off: "Best,\nShrey"
+  never: []                     # e.g. ["commit to a deadline without asking me"]
+
+standing_permissions:           # all off until Shrey turns them on
+  archive_noise: false          # archive newsletters and promotions after triage
+  label_mail: false             # apply Gmail labels
+  calendar_holds: false         # focus blocks and reminders on Shrey's own calendar, no guests
+  backup_to_drive: false        # copy secretary/private/ to the Donna folder in Google Drive
+
+brief:
+  time: "08:45"
+  days: [Mon, Tue, Wed, Thu, Fri]
+  routine_id:                   # set when the scheduled morning brief is created
+
+travel:
+  home_airport:
+  airlines: []                  # preferred airlines; loyalty programme names only, never numbers
+  seat:                         # aisle | window
+  hotel:
+  diet:
+  passport_expiry:              # YYYY-MM only, never the passport number
+
+important_dates: []             # - {what: car insurance renewal, date: 2027-02-14, remind_days_before: 30}

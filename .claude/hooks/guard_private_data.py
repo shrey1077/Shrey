@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""PreToolUse hook: stop personal financial data from reaching this public repository.
+"""PreToolUse hook: stop Shrey's personal data from reaching this public repository.
 
 Blocks a Bash command (exit code 2) when it would:
-- force-add anything under finance/private/, or
-- commit files under finance/private/, or added lines that look like a PAN or Aadhaar number.
+- force-add anything under finance/private/ (the CA's files) or secretary/private/ (Donna's), or
+- commit files under those folders, or added lines that look like a PAN or Aadhaar number.
 """
 
 import json
@@ -12,8 +12,8 @@ import shlex
 import subprocess
 import sys
 
-PRIVATE_DIR = "finance/private/"
-ALLOWED_PRIVATE = {"finance/private/README.md"}
+PRIVATE_DIRS = ("finance/private/", "secretary/private/")
+ALLOWED_PRIVATE = {d + "README.md" for d in PRIVATE_DIRS}
 PAN = re.compile(r"\b[A-Z]{3}[PCHFATBLJG][A-Z][0-9]{4}[A-Z]\b")
 AADHAAR = re.compile(r"\b[2-9][0-9]{3}[ -]?[0-9]{4}[ -]?[0-9]{4}\b")
 
@@ -54,15 +54,17 @@ def check(command: str) -> list[str]:
         if not args:
             continue
         sub, rest = args[0], args[1:]
-        if sub == "add" and ({"-f", "--force"} & set(rest)) and any(PRIVATE_DIR.rstrip("/") in a for a in rest):
-            problems.append("force-adding finance/private/ (personal data stays out of git)")
+        if sub == "add" and ({"-f", "--force"} & set(rest)):
+            for d in PRIVATE_DIRS:
+                if any(d.rstrip("/") in a for a in rest):
+                    problems.append(f"force-adding {d} (personal data stays out of git)")
         if sub == "commit":
             staged = set(git("diff", "--cached", "--name-only").split())
             diff = git("diff", "--cached")
             if any(a == "--all" or re.fullmatch(r"-[a-zA-Z]*a[a-zA-Z]*", a) for a in rest):
                 staged |= set(git("diff", "--name-only").split())
                 diff += git("diff")
-            private = sorted(p for p in staged if p.startswith(PRIVATE_DIR) and p not in ALLOWED_PRIVATE)
+            private = sorted(p for p in staged if p.startswith(PRIVATE_DIRS) and p not in ALLOWED_PRIVATE)
             problems += [f"{p}: personal data folder" for p in private]
             problems += problems_in_diff(diff)
     return problems
@@ -79,7 +81,7 @@ def main() -> int:
     if not problems:
         return 0
     print(
-        "Blocked: this repository is public and the change would publish personal financial data:\n- "
+        "Blocked: this repository is public and the change would publish personal data:\n- "
         + "\n- ".join(dict.fromkeys(problems))
         + "\nUnstage or mask it (e.g. XXXXX1234X). If this is a false positive, ask Shrey to commit it themselves.",
         file=sys.stderr,

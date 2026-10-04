@@ -1,6 +1,8 @@
-# Personal financial data never goes into git: this repository is public.
+# Personal data never goes into git: this repository is public.
 finance/private/*
 !finance/private/README.md
+secretary/private/*
+!secretary/private/README.md
 
 # Statements and tax documents dropped anywhere under finance/
 finance/**/*.pdf

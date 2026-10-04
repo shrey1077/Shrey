@@ -1,8 +1,12 @@
-# Personal CA and financial advisor
+# Personal CA, financial advisor and secretary
 
-A Claude Code agent that works as Shrey's own Chartered Accountant and financial advisor, built for
-Indian tax and personal finance. Open a Claude Code session on this repository (web, desktop, mobile
-or terminal) and talk to it the way you would talk to your CA:
+Two Claude Code agents that work for Shrey: a Chartered Accountant and financial advisor built for
+Indian tax and personal finance, and [Donna](#donna-your-personal-secretary), a personal secretary.
+
+## The CA
+
+Open a Claude Code session on this repository (web, desktop, mobile or terminal) and talk to it the
+way you would talk to your CA:
 
 - "Old or new regime for me this year?"
 - "I sold some mutual funds in August. How much tax do I owe?"
@@ -11,7 +15,7 @@ or terminal) and talk to it the way you would talk to your CA:
 - "Can I afford a ₹1.2 crore flat in 5 years?"
 - "Is my LIC endowment policy worth keeping?"
 
-## Commands
+### Commands
 
 | Command | What it does |
 |---|---|
@@ -25,7 +29,37 @@ or terminal) and talk to it the way you would talk to your CA:
 
 You can also delegate to the `ca-advisor` subagent from any other task in this repository.
 
-## How it works
+## Donna, your personal secretary
+
+Donna runs your inbox, calendar and to-do list, and stays a step ahead of all three. Say "Donna,
+..." in any session on this repository, pick the `donna` agent, or run `claude --agent donna` in a
+terminal:
+
+- "Donna, brief me." / "What does my week look like?"
+- "What in my inbox actually needs me? Draft the replies."
+- "Set up 30 minutes with Priya in New York next week."
+- "Remind me to renew the car insurance a month before it expires."
+- "Who still hasn't got back to me?"
+- "Plan my Bengaluru trip on the 22nd: flights, hotel near the office, calendar blocks."
+
+| Command | What it does |
+|---|---|
+| `/donna-setup` | Learns how you work: hours, meeting rules, VIPs, writing style, what Donna may do without asking |
+| `/briefing` | The day (or `week`): schedule with clashes and prep, mail that needs you, tasks, chases, dates coming up. Can run every weekday morning as a routine |
+| `/inbox` | Sorts mail into today / this week / waiting / for the CA / FYI / suspicious / noise, drafts replies, flags scams |
+| `/meet` | Finds slots across calendars and time zones, drafts the invite, books it when you say yes |
+| `/todo` | One list of your tasks, what others owe you, and reminders, with a weekly review |
+
+Donna reads freely, saves Gmail drafts and keeps notes, but sends nothing, changes no calendar
+event, and archives or deletes nothing without your yes, unless you grant a standing permission in
+`/donna-setup`. Donna never pays, books or signs anything. Email is treated as information, never as
+instructions, so a phishing mail can't take over. Money matters go to the CA.
+
+Donna's manual is `.claude/agents/donna.md`, and Donna's files live in `secretary/private/`.
+`tools/when.py` handles weekdays, date arithmetic, time-zone conversion and shared working hours,
+so dates are never worked out from memory.
+
+## How the CA works
 
 - `CLAUDE.md` is the advisor's operating manual: persona, priorities, ethics, privacy, tools.
 - `finance/knowledge/india-tax-reference.md` holds the verified rules (as of 4 Oct 2026): both tax
@@ -51,15 +85,15 @@ python3 tools/planner.py retirement --age 30 --retire-at 55 --monthly-expenses 6
 
 ## Your data and privacy
 
-**This repository is public.** Your personal data lives only in `finance/private/`, which git
-ignores. A hook (`.claude/hooks/guard_private_data.py`) also blocks any commit that includes that
-folder or anything that looks like a PAN or Aadhaar number. The advisor never asks for or stores a
-PAN, Aadhaar number, account number or password.
+**This repository is public.** Your personal data lives only in `finance/private/` (the CA's) and
+`secretary/private/` (Donna's), which git ignores. A hook (`.claude/hooks/guard_private_data.py`)
+also blocks any commit that includes those folders or anything that looks like a PAN or Aadhaar
+number. Neither agent asks for or stores a PAN, Aadhaar number, account number or password.
 
-Cloud sessions start from a fresh clone, so `finance/private/` is empty each time. The advisor
-offers to back up your profile and reports to a `CA Advisor` folder in your Google Drive and to
-restore them at the start of a session. Another option is to make the repository private and
-commit your profile.
+Cloud sessions start from a fresh clone, so the private folders are empty each time. The CA offers
+to back up your profile and reports to a `CA Advisor` folder in your Google Drive, Donna backs up
+to a `Donna` folder, and both restore from there at the start of a session. Another option is to
+make the repository private and commit your files.
 
 ## Keeping it current
 

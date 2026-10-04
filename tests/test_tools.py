@@ -1,4 +1,4 @@
-"""Tests for the calculators. Run: python3 -m unittest discover -s tests
+"""Tests for the tools and the privacy hook. Run: python3 -m unittest discover -s tests
 
 Expected figures are worked out by hand from the slab tables.
 """
@@ -6,7 +6,7 @@ Expected figures are worked out by hand from the slab tables.
 import os
 import sys
 import unittest
-from datetime import date
+from datetime import date, time, timedelta
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 
@@ -15,6 +15,11 @@ from capital_gains import analyse  # noqa: E402
 from fmt import inr  # noqa: E402
 from income_tax import TaxInput, breakeven_extra_deductions, compare, compute, hra_exemption  # noqa: E402
 from planner import emi_plan, real_return, sip_future_value, xirr  # noqa: E402
+from when import clock_change, parse_moment, shared_hours, shift, zone  # noqa: E402
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".claude", "hooks"))
+
+from guard_private_data import check  # noqa: E402
 
 
 def tax(regime, **kw):
@@ -157,6 +162,57 @@ class Formatting(unittest.TestCase):
         self.assertEqual(inr(1_234_567), "₹12,34,567")
         self.assertEqual(inr(999), "₹999")
         self.assertEqual(inr(-150_000), "-₹1,50,000")
+
+
+class When(unittest.TestCase):
+    def test_workdays_skip_weekends(self):
+        self.assertEqual(shift(date(2026, 10, 4), workdays=5), date(2026, 10, 9))  # Sun -> Fri
+        self.assertEqual(shift(date(2026, 10, 9), workdays=1), date(2026, 10, 12))  # Fri -> Mon
+        self.assertEqual(shift(date(2026, 10, 12), workdays=-1), date(2026, 10, 9))
+
+    def test_months_clamp_to_month_end(self):
+        self.assertEqual(shift(date(2027, 1, 31), months=1), date(2027, 2, 28))
+        self.assertEqual(shift(date(2026, 10, 4), months=-12), date(2025, 10, 4))
+
+    def test_conversion_follows_us_daylight_saving(self):
+        # New York is UTC-4 until 1 Nov 2026, then UTC-5. India has no daylight saving.
+        ny, ist = zone("new york"), zone("IST")
+        before = parse_moment("2026-10-14 9:00 am", ny, date(2026, 10, 4)).astimezone(ist)
+        after = parse_moment("2026-11-04 09:00", ny, date(2026, 10, 4)).astimezone(ist)
+        self.assertEqual((before.hour, before.minute), (18, 30))
+        self.assertEqual((after.hour, after.minute), (19, 30))
+
+    def test_clock_changes_flagged(self):
+        ny = zone("America/New_York")
+        self.assertIn("doesn't exist", clock_change(parse_moment("2026-03-08 02:30", ny, date(2026, 1, 1))))
+        self.assertIn("twice", clock_change(parse_moment("2026-11-01 01:30", ny, date(2026, 1, 1))))
+        self.assertIsNone(clock_change(parse_moment("2026-11-01 12:00", ny, date(2026, 1, 1))))
+
+    def test_shared_hours_india_new_york(self):
+        ist, ny = zone("Asia/Kolkata"), zone("America/New_York")
+        nine, six, seven = time(9), time(18), time(19)
+        self.assertEqual(shared_hours(date(2026, 10, 14), [(ist, nine, six), (ny, nine, six)]), [])
+        [(start, end)] = shared_hours(date(2026, 10, 14), [(ist, nine, seven), (ny, nine, seven)])
+        self.assertEqual(start.astimezone(ist).strftime("%H:%M"), "18:30")
+        self.assertEqual(end - start, timedelta(minutes=30))
+
+    def test_shared_hours_across_the_date_line(self):
+        # Sydney's Wednesday morning is California's Tuesday afternoon.
+        syd, sf = zone("sydney"), zone("san francisco")
+        [(start, end)] = shared_hours(date(2026, 10, 14), [(syd, time(9), time(18)), (sf, time(9), time(18))])
+        self.assertEqual(start.astimezone(sf).strftime("%a %H:%M"), "Tue 15:00")
+        self.assertEqual(end - start, timedelta(hours=3))
+
+    def test_unknown_zone_suggests(self):
+        with self.assertRaisesRegex(ValueError, "America/New_York"):
+            zone("york")
+
+
+class PrivacyHook(unittest.TestCase):
+    def test_force_adding_private_folders_is_blocked(self):
+        self.assertTrue(check("git add -f finance/private/profile.yaml"))
+        self.assertTrue(check("git add --force secretary/private/tasks.md"))
+        self.assertFalse(check("git add tools/when.py"))
 
 
 if __name__ == "__main__":
