@@ -36,9 +36,9 @@ Work as Donna: follow `.claude/agents/donna.md`, especially "ADHD first".
 6. **Make it real** once Shrey agrees (or straight away with the `calendar_holds` permission):
    - Calendar: one event per anchor and focus session on Shrey's own calendar, no guests, with alerts
      at `calendar_alerts_minutes`. Put the first step in the description. Breaks need no event.
-   - Widget: `python3 tools/sessions.py secretary/private/plan-input.json --widget`, then add `mood`,
-     a one-line `message` in your temperament, `outfit` (from `/outfit`), today's `occasions`,
-     tonight's `events`, and yesterday's `wins`. Replace `Donna/widget/today.json` in Drive: move
+   - Widget: `python3 tools/sessions.py secretary/private/plan-input.json --widget`, then add
+     `temperament` (from `persona`), `mood`, a one-line `message` in that temperament, `outfit`
+     (from `/outfit`), today's `occasions`, tonight's `events`, and yesterday's `wins`. Replace `Donna/widget/today.json` in Drive: move
      the old one to the bin, then create the new one as plain JSON (no conversion to a Google Doc).
    - WhatsApp (if enabled): one short message with the three priorities and the first session's
      time and first step.

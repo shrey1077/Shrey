@@ -16,6 +16,8 @@
   const MINOR = new Set(['break', 'buffer', 'reset']);
   const NOT_NEXT = new Set(['break', 'reset']);
   const LABEL = { focus: 'Now', meeting: 'Now', break: 'Break', meal: 'Eat', anchor: 'Now', buffer: 'Get ready', event: 'Now' };
+  const TRACKED = new Set(['focus', 'meeting', 'meal', 'anchor', 'event']); // lateness counts for these
+  const LATE_AFTER = 3; // minutes after the start before it counts as late
 
   const FACE_FOR = {
     angry: { focus: 'serious', meeting: 'serious', break: 'amused', meal: 'intimidating', anchor: 'neutral', buffer: 'thoughtful', event: 'neutral' },
@@ -39,6 +41,7 @@
       skipped: ['Skipped. Fine. The next one counts.'],
       snoozed: ["Five minutes. I'm counting."],
       noted: ['Noted. Go back to what you were doing.'],
+      started: ['Good. Go.'],
     },
     classic: {
       focus: ["Focus time. I'll keep an eye on the clock.", 'Just this one thing for now.'],
@@ -56,6 +59,41 @@
       skipped: ["No problem. On to the next."],
       snoozed: ['Five more minutes.'],
       noted: ["Noted. I'll take it from here."],
+      started: ["Lovely. You've got this."],
+    },
+  };
+
+  // Shrey's choice: angry and sarcastic when running late, sweet and gentle when doing well,
+  // dry and direct the rest of the time. {n} is the minutes late.
+  const EARNED = {
+    late: {
+      focus: ['Oh good, it started {n} minutes ago without you. Bold. Open it.', '{n} minutes late. Riveting. The first step is right there.', "That started {n} minutes ago. I'll wait. Visibly."],
+      meeting: ["Your call started {n} minutes ago. I'm sure they love waiting. Go.", '{n} minutes late to a meeting. Iconic. Join it.'],
+      meal: ['{n} minutes past mealtime. Your stomach sent a memo. Eat.', "Food was due {n} minutes ago. 'One more thing' is not a food group."],
+      anchor: ["{n} minutes past. The day won't start itself.", 'Still not done? {n} minutes and counting. Shocking.'],
+      event: ['Already {n} minutes late. Fashionably? No. Go.'],
+      snoozed: ['Five more minutes. Of course. I have nowhere to be either.', "Snoozed. Again. I'm counting, out loud."],
+      started: ['Ah, you made it. Only {n} minutes late. Go.', 'Finally. So kind of you to join. Go.'],
+    },
+    sweet: {
+      onTime: ['Right on time. I noticed. That was lovely.', 'You started exactly when you said you would. I am proud of you.'],
+      done: ['Done, and done well. Take a breath.', "That's one more finished. You're doing so well.", 'Look at you. Done. Gently on to the next.'],
+      allDone: ["Everything done today. I'm genuinely proud of you. Rest now."],
+      break: ["Rest properly. You've earned this one.", 'Lovely work. Water, a stretch, one slow breath.'],
+    },
+    dry: {
+      focus: ['One thing. This thing.', 'Phone face down. Go.'],
+      meeting: ['Notes open. Be on time.'],
+      break: ['Break. Away from the screen.'],
+      meal: ['Food. Real food.'],
+      anchor: ['Do this one properly.'],
+      buffer: ['Get ready. Notes open, water poured.'],
+      event: ["Don't be late."],
+      idle: ['Nothing scheduled. Use it on purpose.'],
+      none: ['No plan. Ask me to plan your day.'],
+      stale: ["That plan is old. Ask me for today's."],
+      skipped: ['Skipped. Fine. The next one counts.'],
+      noted: ['Noted. Back to what you were doing.'],
     },
   };
 
@@ -76,11 +114,29 @@
   };
   const today = () => clock().toLocaleDateString('en-CA');
   const hash = (s) => [...String(s)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
-  const lines = () => LINES[state.config.layout] || LINES.angry;
+  const temper = () => (state.feed && state.feed.temperament) || 'earned';
+  const lines = () => LINES[temper()] || LINES.angry;
   const pick = (key, seed = '') => {
     const set = lines()[key] || lines().idle;
     return set[hash(seed + key) % set.length];
   };
+  const earned = (tone, key, seed = '', n = 0) => {
+    const set = EARNED[tone][key] || EARNED.dry[key] || EARNED.dry.idle;
+    return set[hash(seed + key) % set.length].replace('{n}', String(n));
+  };
+
+  // A line for something Shrey just did, in the chosen temperament.
+  function react(event, seed = '', n = 0) {
+    if (temper() === 'earned') {
+      const [tone, key] = {
+        done: ['sweet', 'done'], skip: ['dry', 'skipped'], snooze: ['late', 'snoozed'], noted: ['dry', 'noted'],
+        startOnTime: ['sweet', 'onTime'], startLate: ['late', 'started'],
+      }[event];
+      return earned(tone, key, seed, n);
+    }
+    const key = { done: 'done', skip: 'skipped', snooze: 'snoozed', noted: 'noted', startOnTime: 'started', startLate: 'started' }[event];
+    return pick(key, seed);
+  }
 
   function left(mins) {
     const s = Math.max(0, Math.round(mins * 60));
@@ -111,6 +167,13 @@
 
   const fresh = () => Boolean(state.feed && state.feed.date === today());
   const blocks = () => (fresh() ? state.feed.blocks : []);
+  const finished = (id) => marks[id] === 'done' || marks[id] === 'skipped';
+  const doneToday = () => Object.values(marks).filter((m) => m === 'done').length;
+  function lateBy(b, now) {
+    if (!b || !TRACKED.has(b.kind) || marks[b.id]) return 0;
+    const n = Math.floor(now - toMin(b.start));
+    return n >= LATE_AFTER ? n : 0;
+  }
 
   function locate(now) {
     const bs = blocks();
@@ -119,18 +182,23 @@
       .sort((a, b) => MINOR.has(a.kind) - MINOR.has(b.kind) || toMin(b.start) - toMin(a.start))[0] || null;
     const next = bs.find((b) => !NOT_NEXT.has(b.kind) && toMin(b.start) > now && (!current || b.id !== current.id)) || null;
     const previousEnd = Math.max(0, ...bs.filter((b) => toMin(b.end) <= now).map((b) => toMin(b.end)));
-    const remaining = bs.filter((b) => CHECKABLE.has(b.kind) && toMin(b.end) > now && !marks[b.id]);
-    return { current, next, previousEnd, allDone: fresh() && bs.length > 0 && remaining.length === 0 && !current };
+    const remaining = bs.filter((b) => CHECKABLE.has(b.kind) && toMin(b.end) > now && !finished(b.id));
+    return { now, current, next, previousEnd, allDone: fresh() && bs.length > 0 && remaining.length === 0 && !current };
   }
 
   function faceFor(where) {
     if (transient && transient.until > Date.now()) return transient.face;
     if (!fresh()) return 'suspicious';
-    const map = FACE_FOR[state.config.layout] || FACE_FOR.angry;
-    const { current, allDone } = where;
+    const map = FACE_FOR[temper()] || FACE_FOR.angry;
+    const { current, allDone, now } = where;
     if (current) {
       if (marks[current.id] === 'skipped') return 'intimidating';
       if (marks[current.id] === 'done') return 'happy';
+      if (temper() === 'earned') {
+        if (lateBy(current, now)) return 'intimidating';
+        if (marks[current.id] === 'started-ontime') return 'happy';
+        if (current.kind === 'break' && doneToday() > 0) return 'happy';
+      }
       return map[current.kind] || 'neutral';
     }
     if (allDone) return 'happy';
@@ -140,9 +208,23 @@
 
   function lineFor(where) {
     if (transient && transient.until > Date.now()) return transient.line;
+    const { current, allDone, now } = where;
+    if (temper() === 'earned') {
+      if (!state.feed) return earned('dry', 'none');
+      if (!fresh()) return earned('dry', 'stale');
+      if (current) {
+        const n = lateBy(current, now);
+        if (n) return earned('late', current.kind, current.id, n);
+        if (marks[current.id] === 'started-ontime') return earned('sweet', 'onTime', current.id);
+        if (marks[current.id] === 'done') return earned('sweet', 'done', current.id);
+        if (current.kind === 'break' && doneToday() > 0) return earned('sweet', 'break', current.id);
+        return earned('dry', current.kind, current.id);
+      }
+      if (allDone) return earned('sweet', 'allDone', today());
+      return state.feed.message || earned('dry', 'idle', today());
+    }
     if (!state.feed) return pick('none');
     if (!fresh()) return pick('stale');
-    const { current, allDone } = where;
     if (current && !marks[current.id]) return pick(current.kind, current.id);
     if (allDone) return pick('allDone', today());
     return state.feed.message || pick('idle', today());
@@ -178,6 +260,9 @@
       setText('now-step', current.first_step || '');
       setText('left', left(end - now));
       progress = (now - start) / Math.max(1, end - start);
+      const waiting = TRACKED.has(current.kind) && !marks[current.id];
+      $('btn-start').hidden = !waiting;
+      $('btn-done').hidden = waiting;
       $('btn-done').textContent = marks[current.id] === 'done' ? 'Undo' : 'Done';
     } else if (next) {
       const start = toMin(next.start);
@@ -226,7 +311,7 @@
       if (MINOR.has(b.kind)) classes.push('minor');
       if (CHECKABLE.has(b.kind)) classes.push('checkable');
       li.className = classes.join(' ');
-      const status = marks[b.id] === 'done' ? '✓' : marks[b.id] === 'skipped' ? '↷' : '';
+      const status = { done: '✓', skipped: '↷', started: '▸', 'started-ontime': '▸' }[marks[b.id]] || '';
       li.append(span('t', b.start), span('i', ICONS[b.kind] || '•'), span('title', b.title), span('s', status));
       if (CHECKABLE.has(b.kind)) li.addEventListener('click', () => mark(b, marks[b.id] === 'done' ? 'undo' : 'done'));
       ol.append(li);
@@ -283,9 +368,9 @@
     api.log(block.id, action);
     if (action === 'done') {
       chime();
-      say('happy', pick('done', block.id + Date.now()));
+      say('happy', react('done', block.id + Date.now()));
     } else if (action === 'skip') {
-      say('intimidating', pick('skipped'));
+      say('intimidating', react('skip'));
     } else {
       tick(true);
     }
@@ -294,6 +379,22 @@
   function currentBlock() {
     return locate(nowMin()).current;
   }
+
+  $('btn-start').addEventListener('click', () => {
+    const b = currentBlock();
+    if (!b) return;
+    const late = Math.floor(nowMin() - toMin(b.start));
+    const onTime = late < LATE_AFTER;
+    marks[b.id] = onTime ? 'started-ontime' : 'started';
+    saveMarks();
+    api.log(b.id, 'start');
+    if (onTime) {
+      chime();
+      say('happy', react('startOnTime', b.id));
+    } else {
+      say(temper() === 'earned' ? 'suspicious' : 'serious', react('startLate', b.id, late));
+    }
+  });
 
   $('btn-done').addEventListener('click', () => {
     const b = currentBlock();
@@ -311,7 +412,7 @@
     api.log(b.id, 'snooze');
     clearTimeout(snoozeTimer);
     snoozeTimer = setTimeout(() => api.notify('Donna', `Back to it: ${b.title}`), 5 * 60 * 1000);
-    say('suspicious', pick('snoozed'));
+    say('suspicious', react('snooze', b.id + Date.now()));
   });
 
   $('capture').addEventListener('submit', async (e) => {
@@ -324,7 +425,7 @@
       input.value = '';
       $('capture').classList.add('sent');
       setTimeout(() => $('capture').classList.remove('sent'), 1500);
-      say('neutral', pick('noted'), 5);
+      say('neutral', react('noted'), 5);
     } else {
       say('suspicious', 'Choose the plan folder in settings first.', 6);
     }

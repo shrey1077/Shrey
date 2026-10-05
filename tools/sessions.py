@@ -217,7 +217,8 @@ def widget_feed(spec: dict, result: dict) -> dict:
     return {"version": 1, "date": spec.get("date", date.today().isoformat()),
             "timezone": spec.get("timezone", "Asia/Kolkata"),
             "generated_at": datetime.now(ZoneInfo(spec.get("timezone", "Asia/Kolkata"))).isoformat(timespec="minutes"),
-            "mood": "neutral", "message": "", "blocks": blocks, "unscheduled": result["unscheduled"]}
+            "temperament": spec.get("temperament", "earned"), "mood": "neutral", "message": "",
+            "blocks": blocks, "unscheduled": result["unscheduled"]}
 
 
 def _hm(total: int) -> str:

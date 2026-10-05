@@ -10,6 +10,7 @@ const sample = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'sample', '
 
 test('the sample plan passes and keeps its blocks', () => {
   const feed = cleanFeed(sample);
+  assert.strictEqual(feed.temperament, 'earned');
   assert.strictEqual(feed.blocks.length, sample.blocks.length);
   assert.strictEqual(feed.outfit.summary, sample.outfit.summary);
 });
@@ -22,10 +23,11 @@ test('anything that is not a version 1 plan is refused', () => {
 
 test('unknown fields are dropped and strings are bounded', () => {
   const feed = cleanFeed({
-    version: 1, date: '2026-10-05', mood: 'furious', message: 'x'.repeat(1000), script: '<img onerror=alert(1)>',
+    version: 1, date: '2026-10-05', mood: 'furious', temperament: 'unhinged', message: 'x'.repeat(1000), script: '<img onerror=alert(1)>',
     blocks: [{ id: 'b1', start: '10:00', end: '10:45', kind: 'rm -rf', title: 'Deck', html: '<b>' }],
   });
   assert.strictEqual(feed.mood, '');
+  assert.strictEqual(feed.temperament, '');
   assert.strictEqual(feed.message.length, 240);
   assert.strictEqual(feed.script, undefined);
   assert.strictEqual(feed.blocks[0].kind, 'event');

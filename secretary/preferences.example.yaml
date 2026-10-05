@@ -5,7 +5,7 @@
 as_of:                          # YYYY-MM-DD of the last update
 
 persona:
-  temperament: angry            # angry (always angry, even when happy) | classic (warm and witty)
+  temperament: earned           # earned (sarcastic when late, sweet when doing well) | angry | classic
   call_me: Shrey
 
 basics:

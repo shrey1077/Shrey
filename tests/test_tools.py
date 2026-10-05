@@ -264,6 +264,7 @@ class Sessions(unittest.TestCase):
     def test_widget_feed_shape(self):
         feed = widget_feed(EXAMPLE, plan(EXAMPLE))
         self.assertEqual(feed["version"], 1)
+        self.assertEqual(feed["temperament"], "earned")
         self.assertTrue(all({"id", "start", "end", "kind", "title"} <= set(b) for b in feed["blocks"]))
         self.assertRegex(feed["blocks"][0]["start"], r"^\d\d:\d\d$")
 

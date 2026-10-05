@@ -3,6 +3,7 @@
 // The page renders these as text, never HTML, so a tampered file can't run code.
 
 const KINDS = new Set(['anchor', 'meal', 'meeting', 'event', 'buffer', 'reset', 'focus', 'break']);
+const TEMPERS = new Set(['earned', 'angry', 'classic']);
 const MOODS = new Set(['neutral', 'amused', 'serious', 'thoughtful', 'suspicious', 'surprised', 'happy', 'intimidating']);
 
 const str = (v, max = 200) => (typeof v === 'string' ? v.slice(0, max) : '');
@@ -15,6 +16,7 @@ function cleanFeed(raw) {
     date: /^\d{4}-\d{2}-\d{2}$/.test(raw.date) ? raw.date : '',
     generated_at: str(raw.generated_at, 40),
     mood: MOODS.has(raw.mood) ? raw.mood : '',
+    temperament: TEMPERS.has(raw.temperament) ? raw.temperament : '',
     message: str(raw.message, 240),
     blocks: list(raw.blocks, 80)
       .map((b) => ({
@@ -30,4 +32,4 @@ function cleanFeed(raw) {
   };
 }
 
-module.exports = { cleanFeed, str, hhmm, KINDS, MOODS };
+module.exports = { cleanFeed, str, hhmm, KINDS, MOODS, TEMPERS };
