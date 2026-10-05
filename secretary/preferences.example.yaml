@@ -7,6 +7,14 @@ as_of:                          # YYYY-MM-DD of the last update
 persona:
   temperament: earned           # earned (sarcastic when late, sweet when doing well) | angry | classic
   call_me: Shrey
+  dials:                        # 0-10; the widget's Settings tab writes these to Donna/widget/persona.json
+    humour: 6
+    sarcasm: 8
+    anger: 6
+    calm: 5
+    happiness: 7
+    sadness: 2                  # lets disappointment show, never guilt
+    chattiness: 3               # how long chat replies run
 
 basics:
   name: Shrey

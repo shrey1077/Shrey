@@ -28,6 +28,7 @@ function cleanFeed(raw) {
     occasions: list(raw.occasions, 5).map((o) => ({ who: str(o.who, 60), what: str(o.what, 60), action: str(o.action, 140) })),
     events: list(raw.events, 5).map((e) => ({ title: str(e.title, 100), when: str(e.when, 60), where: str(e.where, 80) })),
     wins: list(raw.wins, 3).map((w) => str(w, 140)).filter(Boolean),
+    replies: list(raw.replies, 20).map((r) => ({ at: str(r.at, 40), text: str(r.text, 600) })).filter((r) => r.text),
     reminders: list(raw.reminders, 20).map((r) => ({ at: hhmm(r.at), text: str(r.text, 140) })).filter((r) => r.at && r.text),
   };
 }

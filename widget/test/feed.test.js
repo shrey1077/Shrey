@@ -45,3 +45,8 @@ test('blocks with bad times or no title are dropped', () => {
   });
   assert.deepStrictEqual(feed.blocks.map((b) => b.id), ['c']);
 });
+
+test('replies from Donna are kept as bounded text', () => {
+  const feed = cleanFeed({ version: 1, date: '2026-10-05', blocks: [], replies: [{ at: '2026-10-05T09:00', text: 'Done. Moved it to 4 pm.' }, { at: 'x', text: '' }] });
+  assert.deepStrictEqual(feed.replies, [{ at: '2026-10-05T09:00', text: 'Done. Moved it to 4 pm.' }]);
+});

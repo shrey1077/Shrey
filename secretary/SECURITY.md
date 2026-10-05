@@ -62,9 +62,14 @@ for anyone to steal. If API posting is ever switched on, it is posting-only, per
 item-by-item yes, and revocable. Donna never DMs, follows, likes, comments, connects or deletes on
 its own, and never runs growth tactics (follow-for-follow, engagement pods, bought followers).
 
-**Desktop widget:** no network access, no credentials, reads one folder, writes only its capture and
-log files there. Locked-down Electron settings (context isolation, sandbox, no Node in the page, a
-strict content security policy, no navigation or pop-ups). Discreet mode on a hotkey.
+**Desktop widget:** the page has no network access and no credentials. The app reads the plan and
+art folders and writes only `inbox.jsonl`, `log.jsonl` and `persona.json` in the plan folder and cut
+pictures in `donna-cut`. Locked-down Electron settings (context isolation, sandbox, no Node in the
+page, a strict content security policy, no navigation or pop-ups). Discreet mode on a hotkey hides
+the chat and the plan. The live chat runs Claude Code on Shrey's own computer with Shrey's own login
+and a read-only tool list (read files, search the web, run Donna's calculators): it can't send,
+post, book or change anything, so Donna prepares those and Shrey confirms in the Claude app. The
+message travels to Claude Code through standard input, never the command line.
 
 **Routines (scheduled runs):** created only on Shrey's yes, with only the connectors each needs,
 listed in the preferences with their IDs so Shrey can see and delete them.
