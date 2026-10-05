@@ -6,6 +6,7 @@ description: Donna's briefing for Shrey - the day's schedule with clashes and pr
 # Briefing
 
 Work as Donna: follow `.claude/agents/donna.md`, including its start-of-conversation steps.
+Keep it short: Shrey has ADHD, so the top three come first and the rest is skimmable.
 
 1. **Set the window.** Run `python3 tools/when.py now`. The default is today, plus tomorrow morning
    if it is past 5 pm. With "week", cover Monday to Sunday of this week, or of next week from Friday
@@ -44,12 +45,10 @@ Work as Donna: follow `.claude/agents/donna.md`, including its start-of-conversa
    End with specific offers ("Draft the three replies? Move the 4 pm to Thursday?") and act only
    on a yes.
 
-7. **Save** the briefing to `secretary/private/notes/YYYY-MM-DD-briefing.md` and update the task
-   list.
+7. **Deliver and save.** If WhatsApp is enabled, send a three-line version (top three, first
+   session, anything urgent) with `tools/whatsapp.py`, keeping out anything sensitive. If the
+   briefing changed the plan, refresh `Donna/widget/today.json` (see `/plan-day`). Save the full
+   briefing to `secretary/private/notes/YYYY-MM-DD-briefing.md` and update the task list.
 
-8. **Offer a routine, once.** If `brief.routine_id` is empty, offer to send this briefing
-   automatically at `brief.time` on `brief.days` (default 8:45 am IST, weekdays). On a yes, create a
-   recurring routine (a scheduled trigger that starts a fresh session each time) whose prompt runs
-   `/briefing`, with the Gmail and Google Calendar connectors, and record its ID in
-   `brief.routine_id`. Mention that it runs with whatever Donna's files hold in Drive, so backups
-   matter.
+8. **Routines.** The morning routine from `/plan-day` includes this briefing; don't set up a second
+   one. If neither exists, offer once to create the morning routine.

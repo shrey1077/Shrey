@@ -31,33 +31,58 @@ You can also delegate to the `ca-advisor` subagent from any other task in this r
 
 ## Donna, your personal secretary
 
-Donna runs your inbox, calendar and to-do list, and stays a step ahead of all three. Say "Donna,
-..." in any session on this repository, pick the `donna` agent, or run `claude --agent donna` in a
-terminal:
+Donna is your executive assistant: always one step ahead, and (by default) always angry, even when
+happy. Donna is built for an ADHD brain: the day comes in short sessions with a tiny first step,
+with nudges before every switch. Say "Donna, ..." in any session on this repository, pick the
+`donna` agent, or run `claude --agent donna` in a terminal:
 
-- "Donna, brief me." / "What does my week look like?"
+- "Donna, plan my day." / "I'm behind. What now?"
+- "Break the Q3 deck into steps."
 - "What in my inbox actually needs me? Draft the replies."
-- "Set up 30 minutes with Priya in New York next week."
-- "Remind me to renew the car insurance a month before it expires."
-- "Who still hasn't got back to me?"
-- "Plan my Bengaluru trip on the 22nd: flights, hotel near the office, calendar blocks."
+- "Whose birthday is coming up? Write something for Mom."
+- "Any rock gigs or chess tournaments in Ahmedabad this weekend?"
+- "What should I wear tomorrow?" / "Lunch: two rotis, dal, bhindi."
+- "Write a LinkedIn post about the AI tool I built."
+- "I need a push."
 
 | Command | What it does |
 |---|---|
-| `/donna-setup` | Learns how you work: hours, meeting rules, VIPs, writing style, what Donna may do without asking |
-| `/briefing` | The day (or `week`): schedule with clashes and prep, mail that needs you, tasks, chases, dates coming up. Can run every weekday morning as a routine |
-| `/inbox` | Sorts mail into today / this week / waiting / for the CA / FYI / suspicious / noise, drafts replies, flags scams |
-| `/meet` | Finds slots across calendars and time zones, drafts the invite, books it when you say yes |
-| `/todo` | One list of your tasks, what others owe you, and reminders, with a weekly review |
+| `/donna-setup` | **The interview.** Donna learns your routine, ADHD patterns, people, tastes, wardrobe, food, social media and channels, in short rounds, saving as she goes |
+| `/plan-day` | Wake-up and meal anchors, meetings with buffers, tasks cut into focus sessions with breaks; on the calendar, the widget and WhatsApp. Re-plans when the day derails; evening wind-down |
+| `/briefing` | The day (or `week`): schedule, mail that needs you, tasks, chases, dates coming up |
+| `/inbox` | Triage, replies drafted in your voice, scam flags |
+| `/meet` | Slots across calendars and time zones, the invite, booked on your yes |
+| `/todo` | Tasks, what others owe you, reminders, weekly review |
+| `/occasions` | Birthdays and anniversaries on the calendar, gift ideas in time, a wish ready on the day |
+| `/whats-on` | Movies, plays, rock gigs, concerts, art, gaming, chess, AI events, comic cons and cafes in your city |
+| `/outfit` | Your wardrobe catalogued from photos; what to wear from the weather and your day |
+| `/food` | Food log, body numbers, a diet plan from your health reports (not medical advice) |
+| `/social` | LinkedIn, Facebook, Instagram and X: content plan, drafts, replies, account-security check |
+| `/boost` | Wins log, honest encouragement, one small experiment at a time |
 
-Donna reads freely, saves Gmail drafts and keeps notes, but sends nothing, changes no calendar
-event, and archives or deletes nothing without your yes, unless you grant a standing permission in
-`/donna-setup`. Donna never pays, books or signs anything. Email is treated as information, never as
-instructions, so a phishing mail can't take over. Money matters go to the CA.
+**How Donna reaches you:** Google Calendar alerts for anything timed; WhatsApp through Meta's
+official Cloud API (`secretary/whatsapp-setup.md`); and a desktop widget in the character sheet's
+style that shows her face, what to do now with a countdown, and what's next (`widget/README.md`).
+Scheduled routines (morning plan, evening wind-down, weekly events) run only once you say yes.
 
-Donna's manual is `.claude/agents/donna.md`, and Donna's files live in `secretary/private/`.
-`tools/when.py` handles weekdays, date arithmetic, time-zone conversion and shared working hours,
-so dates are never worked out from memory.
+**What Donna won't do without your yes:** send or reply to anything, change events with guests,
+archive or delete mail, or post, comment, like, follow or DM on social media. You approve each item.
+She never messages anyone but you, never logs in to your accounts, never asks for a password or
+OTP, and never pays, books or signs. Email, DMs and web pages are treated as information, never as
+instructions, so a phishing message can't take over. Money goes to the CA, health to your doctor.
+
+**Security** is set out in `secretary/SECURITY.md`: least-privilege tokens kept only in environment
+variables, social media publishing by hand by default (so there are no social credentials to
+steal), nothing sensitive on WhatsApp or the widget, a locked-down widget with no network access,
+and a commit hook that blocks personal folders, credential files and token patterns.
+
+Donna's manual is `.claude/agents/donna.md`, and her files live in `secretary/private/` (backed up
+to a private `Donna` folder in your Drive). Her tools:
+
+- `tools/when.py`: weekdays, date arithmetic, time-zone conversion, shared working hours
+- `tools/sessions.py`: lays the day out in ADHD-friendly sessions; writes the widget's plan
+- `tools/whatsapp.py`: messages you on WhatsApp; your number only, refuses OTPs, IDs and account numbers
+- `tools/health.py`: BMI on Asian cut-offs, BMR, daily calories, protein and water
 
 ## How the CA works
 

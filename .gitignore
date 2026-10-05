@@ -11,6 +11,22 @@ finance/**/*.xlsx
 finance/**/*.csv
 finance/**/*.zip
 
+# Secrets and credentials never go into git.
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+client_secret*.json
+token*.json
+
+# Donna's desktop widget: local settings, your character art, and build output
+widget/config.json
+widget/assets/*
+!widget/assets/README.md
+widget/node_modules/
+widget/dist/
+widget/out/
+
 __pycache__/
 *.pyc

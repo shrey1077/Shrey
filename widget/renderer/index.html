@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Donna</title>
+  <link rel="stylesheet" href="../node_modules/@fontsource/cormorant-garamond/500.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/cormorant-garamond/600.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/cormorant-garamond/500-italic.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/great-vibes/400.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/inter/400.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/inter/500.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-mode="card">
+  <main class="card" id="card">
+    <header class="head">
+      <button class="face" id="face" type="button" title="Mini view / full view"><span class="face-img" id="face-img"></span></button>
+      <div class="brand">
+        <h1>Donna</h1>
+        <p class="role">Executive assistant</p>
+        <p class="motto">One step ahead.</p>
+      </div>
+      <div class="mini-now" id="mini-now">
+        <p class="mini-title" id="mini-title"></p>
+        <p class="mini-meta" id="mini-meta"></p>
+      </div>
+      <nav class="tools">
+        <button type="button" id="btn-discreet" title="Discreet mode (Ctrl+Shift+D)" aria-label="Discreet mode">◐</button>
+        <button type="button" id="btn-settings" title="Settings" aria-label="Settings">⚙</button>
+        <button type="button" id="btn-quit" title="Quit Donna" aria-label="Quit">✕</button>
+      </nav>
+    </header>
+
+    <p class="line private" id="line"></p>
+
+    <section class="now" id="now">
+      <div class="ring" id="ring">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="track" r="44" cx="50" cy="50"></circle>
+          <circle class="arc" id="arc" r="44" cx="50" cy="50"></circle>
+        </svg>
+        <span class="left" id="left">--</span>
+      </div>
+      <div class="now-text">
+        <p class="label"><span id="now-label">Now</span> <span id="now-time"></span></p>
+        <h2 class="private" id="now-title"></h2>
+        <p class="step private" id="now-step"></p>
+        <div class="actions" id="actions">
+          <button type="button" class="primary" id="btn-done">Done</button>
+          <button type="button" id="btn-snooze">+5 min</button>
+          <button type="button" id="btn-skip">Skip</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="next private" id="next"></p>
+
+    <section class="day">
+      <h3>Today</h3>
+      <ol class="timeline" id="timeline"></ol>
+    </section>
+
+    <section class="extras private" id="extras"></section>
+
+    <form class="capture" id="capture" autocomplete="off">
+      <input id="capture-text" maxlength="500" placeholder="Tell Donna…" aria-label="Tell Donna">
+      <button type="submit" aria-label="Send to Donna">→</button>
+    </form>
+
+    <p class="discreet-note" id="discreet-note">Discreet mode · Ctrl+Shift+D to show</p>
+
+    <section class="settings" id="settings" hidden>
+      <header>
+        <h3>Settings</h3>
+        <button type="button" id="btn-close-settings" aria-label="Close settings">✕</button>
+      </header>
+      <div class="row">
+        <div><p class="k">Plan folder</p><p class="v" id="set-folder">Not chosen</p></div>
+        <button type="button" id="btn-folder">Choose…</button>
+      </div>
+      <div class="row">
+        <div><p class="k">Character sheet</p><p class="v" id="set-sheet">Not chosen</p></div>
+        <button type="button" id="btn-sheet">Choose…</button>
+      </div>
+      <div class="row">
+        <p class="k">Donna</p>
+        <div class="seg" role="radiogroup" aria-label="Temperament">
+          <button type="button" data-layout="angry" role="radio">Angry</button>
+          <button type="button" data-layout="classic" role="radio">Classic</button>
+        </div>
+      </div>
+      <label class="row check"><span class="k">Always on top</span><input type="checkbox" id="set-top"></label>
+      <label class="row check"><span class="k">Start at login</span><input type="checkbox" id="set-login"></label>
+      <label class="row check"><span class="k">Chime on nudges</span><input type="checkbox" id="set-chime"></label>
+      <h4>Expressions <span id="faces-how"></span></h4>
+      <ol class="faces" id="faces"></ol>
+    </section>
+  </main>
+  <script src="faces.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

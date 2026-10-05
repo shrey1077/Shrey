@@ -15,11 +15,14 @@ from capital_gains import analyse  # noqa: E402
 from fmt import inr  # noqa: E402
 from income_tax import TaxInput, breakeven_extra_deductions, compare, compute, hra_exemption  # noqa: E402
 from planner import emi_plan, real_return, sip_future_value, xirr  # noqa: E402
+from health import needs  # noqa: E402
+from sessions import EXAMPLE, plan, widget_feed  # noqa: E402
 from when import clock_change, parse_moment, shared_hours, shift, zone  # noqa: E402
+from whatsapp import config, screen, template_payload, text_payload  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".claude", "hooks"))
 
-from guard_private_data import check  # noqa: E402
+from guard_private_data import SECRET_FILES, check, problems_in_diff  # noqa: E402
 
 
 def tax(regime, **kw):
@@ -208,11 +211,122 @@ class When(unittest.TestCase):
             zone("york")
 
 
+def _day(**over):
+    spec = {"date": "2026-10-05", "day_start": "07:00", "day_end": "22:00", "anchors": [], "fixed": [],
+            "tasks": [], "settings": {"focus_hours": ["09:00-18:00"], "peak_hours": ["10:00-12:00"]}}
+    spec.update(over)
+    return plan(spec)
+
+
+class Sessions(unittest.TestCase):
+    def test_long_task_is_split_with_breaks(self):
+        r = _day(tasks=[{"id": "t", "title": "Deck", "minutes": 120, "priority": 1}])
+        focus = [b for b in r["blocks"] if b["kind"] == "focus"]
+        self.assertEqual([b["end"] - b["start"] for b in focus], [45, 45, 30])
+        self.assertEqual(focus[0]["start"], 9 * 60)  # not before focus hours
+        self.assertEqual(focus[1]["start"] - focus[0]["end"], 10)  # a break in between
+        self.assertEqual(focus[0]["title"], "Deck (1/3)")
+
+    def test_no_scrap_sessions(self):
+        r = _day(tasks=[{"title": "Report", "minutes": 50}])
+        self.assertEqual([b["end"] - b["start"] for b in r["blocks"] if b["kind"] == "focus"], [50])
+
+    def test_meeting_gets_buffer_and_reset(self):
+        r = _day(fixed=[{"title": "Call", "start": "11:00", "end": "11:30", "kind": "meeting"}])
+        kinds = {b["kind"]: (b["start"], b["end"]) for b in r["blocks"]}
+        self.assertEqual(kinds["buffer"], (10 * 60 + 50, 11 * 60))
+        self.assertEqual(kinds["reset"], (11 * 60 + 30, 11 * 60 + 35))
+
+    def test_high_energy_waits_for_peak_but_priority_wins(self):
+        r = _day(tasks=[{"title": "Hard", "minutes": 40, "priority": 2, "energy": "high"},
+                        {"title": "Easy", "minutes": 40, "priority": 2, "energy": "low"}])
+        first = min((b for b in r["blocks"] if b["kind"] == "focus"), key=lambda b: b["start"])
+        self.assertEqual(first["title"], "Easy")
+        r = _day(tasks=[{"title": "Hard", "minutes": 40, "priority": 1, "energy": "high"},
+                        {"title": "Chore", "minutes": 40, "priority": 4, "energy": "low"}])
+        first = min((b for b in r["blocks"] if b["kind"] == "focus"), key=lambda b: b["start"])
+        self.assertEqual(first["title"], "Hard")
+
+    def test_focus_cap_reports_what_did_not_fit(self):
+        r = _day(tasks=[{"id": "a", "title": "A", "minutes": 200}, {"id": "b", "title": "B", "minutes": 200}],
+                 settings={"focus_hours": ["09:00-18:00"], "peak_hours": [], "max_focus_minutes": 240})
+        self.assertEqual(r["focus_minutes"], 240)
+        self.assertEqual(sum(t["minutes"] for t in r["unscheduled"]), 160)
+
+    def test_task_window_and_clashes(self):
+        r = _day(tasks=[{"title": "Chess", "minutes": 30, "window": "18:00-21:00"}],
+                 anchors=[{"title": "Lunch", "start": "13:00", "minutes": 45, "kind": "meal"}],
+                 fixed=[{"title": "Dentist", "start": "13:30", "end": "14:00", "kind": "event"}])
+        chess = next(b for b in r["blocks"] if b["kind"] == "focus")
+        self.assertEqual(chess["start"], 18 * 60)
+        self.assertEqual(len(r["clashes"]), 1)
+
+    def test_widget_feed_shape(self):
+        feed = widget_feed(EXAMPLE, plan(EXAMPLE))
+        self.assertEqual(feed["version"], 1)
+        self.assertTrue(all({"id", "start", "end", "kind", "title"} <= set(b) for b in feed["blocks"]))
+        self.assertRegex(feed["blocks"][0]["start"], r"^\d\d:\d\d$")
+
+
+class WhatsApp(unittest.TestCase):
+    def test_screen_blocks_secrets_and_identifiers(self):
+        self.assertTrue(screen("Your OTP is 482913"))
+        # Built from pieces so this file doesn't trip the commit hook it is testing alongside.
+        self.assertTrue(screen("PAN " + "ABCPE" + "1234F on file"))
+        self.assertTrue(screen("Card 4111 1111 " + "1111 1111"))
+        self.assertTrue(screen("A/c 123456789012 credited"))
+        self.assertTrue(screen("x" * 1200))
+        self.assertEqual(screen("Breakfast. Now. Poha or eggs, your call."), [])
+        self.assertEqual(screen("Session 2 at 10:30: Q3 deck, 45 min"), [])
+
+    def test_config_requires_env_and_pins_recipient(self):
+        with self.assertRaisesRegex(RuntimeError, "WHATSAPP_TOKEN"):
+            config({})
+        env = {"WHATSAPP_TOKEN": "t", "WHATSAPP_PHONE_NUMBER_ID": "123456789", "WHATSAPP_TO": "+15550001111"}
+        cfg = config(env)
+        self.assertEqual(cfg["to"], "15550001111")
+        self.assertIn("/v26.0/123456789/messages", cfg["url"])
+        with self.assertRaises(RuntimeError):
+            config({**env, "WHATSAPP_TO": "not-a-number"})
+
+    def test_payloads(self):
+        self.assertEqual(text_payload("91", "hi")["text"]["body"], "hi")
+        t = template_payload("91", "donna_nudge", ["Deck at 10"])
+        self.assertEqual(t["template"]["components"][0]["parameters"][0]["text"], "Deck at 10")
+        with self.assertRaises(ValueError):
+            template_payload("91", "Bad Name", [])
+
+
+class Health(unittest.TestCase):
+    def test_mifflin_st_jeor_and_asian_bmi(self):
+        # 10*78 + 6.25*175 - 5*30 + 5 = 1728.75; x1.375 = 2377; BMI 25.5 is obese on Asian cut-offs.
+        r = needs("male", 30, 175, 78, "light", "maintain")
+        self.assertEqual((r["bmr_kcal"], r["tdee_kcal"]), (1729, 2377))
+        self.assertEqual((r["bmi"], r["bmi_band_asian"]), (25.5, "obese"))
+
+    def test_loss_target_never_below_bmr(self):
+        r = needs("female", 28, 160, 55, "sedentary", "lose")
+        self.assertGreaterEqual(r["target_kcal"], r["bmr_kcal"] - 5)
+
+
 class PrivacyHook(unittest.TestCase):
     def test_force_adding_private_folders_is_blocked(self):
         self.assertTrue(check("git add -f finance/private/profile.yaml"))
         self.assertTrue(check("git add --force secretary/private/tasks.md"))
         self.assertFalse(check("git add tools/when.py"))
+
+    def test_tokens_and_keys_in_diffs_are_caught(self):
+        fakes = ["EAA" + "B" * 40, "AKIA" + "ABCDEFGHIJKLMNOP", "ghp_" + "a" * 36,
+                 "-----BEGIN " + "OPENSSH PRIVATE KEY-----", 'api_key = "' + "z" * 20 + '"']
+        for fake in fakes:
+            self.assertTrue(problems_in_diff(f"+++ b/x.py\n+token = {fake}\n"), fake)
+        self.assertEqual(problems_in_diff("+++ b/x.py\n+WHATSAPP_TOKEN = os.environ['WHATSAPP_TOKEN']\n"), [])
+
+    def test_credential_files(self):
+        for path in [".env", "widget/.env.local", "keys/donna.pem", "client_secret_123.json", "token.json"]:
+            self.assertTrue(SECRET_FILES.search(path), path)
+        for path in ["tools/whatsapp.py", "secretary/whatsapp-setup.md", "widget/package.json"]:
+            self.assertFalse(SECRET_FILES.search(path), path)
 
 
 if __name__ == "__main__":
