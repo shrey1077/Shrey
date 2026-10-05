@@ -39,6 +39,12 @@ button {
   -webkit-app-region: no-drag;
 }
 
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
 .card {
   position: relative;
   width: 360px;

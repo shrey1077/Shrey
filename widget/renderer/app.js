@@ -232,7 +232,8 @@
       ol.append(li);
       if (!focusEl && (classes.includes('current') || !classes.includes('past'))) focusEl = li;
     }
-    if (focusEl) focusEl.scrollIntoView({ block: 'nearest' });
+    // Scroll only the list (never the window) so the current item sits near the top.
+    if (focusEl) ol.scrollTop += focusEl.getBoundingClientRect().top - ol.getBoundingClientRect().top - 4;
   }
 
   function renderExtras() {
