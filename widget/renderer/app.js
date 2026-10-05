@@ -25,11 +25,20 @@
     ready: 'Getting ready', commute: 'Heading out', exercise: 'Exercise', winddown: 'Winding down', event: 'Night out',
     celebrate: 'Celebrating', chill: 'Chilling',
   };
+  // Her mood in the circle: the word, and the colour family of the ring.
+  const MOOD = {
+    normal: ['Composed', 'calm'], serious: ['Serious', 'calm'], thoughtful: ['Thinking', 'calm'],
+    suspicious: ['Suspicious', 'calm'], surprised: ['Surprised', 'calm'], cool: ['Cool', 'calm'],
+    happy: ['Pleased', 'joy'], laughing: ['Laughing', 'joy'], adoring: ['Enchanted', 'joy'],
+    relaxed: ['Relaxed', 'joy'], blissful: ['Blissful', 'joy'], amused: ['Amused', 'playful'],
+    playful: ['Playful', 'playful'], angry: ['Angry', 'angry'], furious: ['Furious', 'angry'],
+    cooling: ['Cooling down', 'sad'], sad: ['Sad', 'sad'], crying: ['Crying', 'sad'], sobbing: ['Sobbing', 'sad'],
+  };
   const SLOT_OPTIONS = ['body.normal', 'body.happy', 'body.amused', 'body.angry', 'body.serious', 'body.thoughtful', 'bust',
     'face.normal', 'face.happy', 'face.amused', 'face.angry', 'face.serious', 'face.thoughtful', 'face.surprised',
     'scene.morning', 'scene.focus', 'scene.call', 'scene.coffee', 'scene.lunch', 'scene.exercise', 'scene.winddown', 'scene.event'];
 
-  let state = { config: { temperament: 'earned', dials: { ...Voice.DEFAULT_DIALS }, figure: 'auto', chime: true, mode: 'card', chat: {} }, feed: null, error: '', discreet: false };
+  let state = { config: { temperament: 'earned', dials: { ...Voice.DEFAULT_DIALS }, figure: 'full', chime: true, mode: 'card', chat: {} }, feed: null, error: '', discreet: false };
   let marks = {};
   let transient = null; // { emotion, line, until }
   let snoozeTimer = null;
@@ -135,6 +144,8 @@
 
   // ---- what she shows ----
 
+  // The picture standing in the corner. Full body follows her mood; Scenes shows what she is doing
+  // when things are calm and her mood when they aren't.
   function pictureFor(sit, emotion, strong) {
     const mode = state.config.figure;
     const seed = `${today()}|${sit.block ? sit.block.id : sit.key}`;
@@ -143,47 +154,48 @@
       const b = Art.pick('bust', seed);
       return b && { ...b, slot: 'bust' };
     };
-    const face = () => Art.find('face', emotion, seed);
-    if (mode === 'close') return face() || bust() || body();
-    if (mode === 'bust') return bust() || body() || face();
-    if (mode === 'auto' && !strong && sit.block) {
+    if (mode === 'bust') return bust() || body();
+    if (mode === 'scenes' && !strong && sit.block) {
       const scene = Manifest.sceneFor(sit.block);
       const item = scene && Art.pick(`scene.${scene}`, seed);
       if (item) return { ...item, slot: `scene.${scene}` };
     }
-    return body() || bust() || face();
+    return body() || bust();
   }
 
-  function caption(item, emotion) {
-    if (!item) return '';
-    const [kind, name] = item.slot.split('.');
-    if (kind === 'scene') return SCENE_LABEL[name] || name;
-    const shown = item.slot === 'bust' ? emotion : name;
-    return shown.replace(/^\w/, (c) => c.toUpperCase());
+  // As tall as the corner allows, feet on the floor; small pieces are enlarged at most twice.
+  function fitFigure() {
+    const img = $('figure-img');
+    const stage = $('stage');
+    const framed = stage.classList.contains('framed');
+    const w = stage.clientWidth - (framed ? 0 : 12);
+    const h = stage.clientHeight - (framed ? 0 : 18);
+    if (!img.naturalWidth || w <= 0 || h <= 0) return;
+    const k = Math.min(2, w / img.naturalWidth, h / img.naturalHeight);
+    img.style.width = `${Math.round(img.naturalWidth * k)}px`;
+    img.style.height = `${Math.round(img.naturalHeight * k)}px`;
   }
+  $('figure-img').addEventListener('load', fitFigure);
 
   function showFigure(sit, emotion, strong) {
     const item = pictureFor(sit, emotion, strong);
     const img = $('figure-img');
-    const stage = $('stage');
-    stage.classList.toggle('has-art', Boolean(item));
+    $('stage').classList.toggle('has-art', Boolean(item));
     if (item && img.dataset.url !== item.url) {
       img.dataset.url = item.url;
       img.src = item.url;
-      stage.classList.toggle('framed', !item.cutout);
-      if (Motion.enabled()) Motion.show(item.url, { cutout: item.cutout });
-      const shown = Motion.enabled() ? $('figure-canvas') : img;
-      shown.classList.remove('swap');
-      void shown.offsetWidth;
-      shown.classList.add('swap');
-    }
-    Motion.mood(emotion);
-    if (!item && img.dataset.url) {
+      $('stage').classList.toggle('framed', !item.cutout);
+    } else if (!item && img.dataset.url) {
       img.removeAttribute('src');
       img.dataset.url = '';
     }
-    setText('figure-cap', caption(item, emotion));
-    Art.paintFace($('badge-img'), emotion, today());
+    fitFigure(); // the corner changes size with the slim bar and Off
+    const [word, tone] = MOOD[emotion] || MOOD.normal;
+    const mood = $('mood');
+    mood.dataset.tone = tone;
+    mood.setAttribute('aria-label', `Donna's mood: ${word}`);
+    setText('mood-word', word);
+    Art.paintFace($('mood-img'), emotion, today());
     Art.paintFace($('face-img'), emotion, today());
   }
 
@@ -304,7 +316,6 @@
       emotion = sit.emotion || emotionFor(sit.key, said, sit.n || 0);
       line = sit.key === 'idle' && state.feed && state.feed.message ? state.feed.message : said.text;
     }
-    if ($('line').textContent !== line) Motion.talk(line.length * 45);
     setText('line', line);
     showFigure(sit, emotion, active || sit.late || ['onTime', 'done', 'allDone'].includes(sit.key));
     renderNow(where, now);
@@ -792,7 +803,6 @@
     state = { ...state, ...s };
     ROOT.dataset.mode = s.config.mode;
     ROOT.dataset.figure = s.config.figure;
-    if (Motion.init($('figure-canvas'))) ROOT.classList.add('animated');
     setDiscreet(s.discreet);
     loadMarks();
     chatNote();

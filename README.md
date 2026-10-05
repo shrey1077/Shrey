@@ -61,10 +61,11 @@ with nudges before every switch. Say "Donna, ..." in any session on this reposit
 | `/boost` | Wins log, honest encouragement, one small experiment at a time |
 
 **How Donna reaches you:** Google Calendar alerts for anything timed; WhatsApp through Meta's
-official Cloud API (`secretary/whatsapp-setup.md`); and a desktop widget with her full figure (cut
-from your art sheets into emotions and scenes), the day with a countdown, a chat box, and a Settings
-tab with personality dials for humour, sarcasm, anger, calm, happiness, sadness and chattiness
-(`widget/README.md`).
+official Cloud API (`secretary/whatsapp-setup.md`); and a desktop widget where she stands full
+height in the corner (cut from your art sheets into emotions and scenes), with the day and a
+countdown on the other side, a chat box, a circle showing her mood with a close-up of her face, and
+a Settings tab with personality dials for humour, sarcasm, anger, calm, happiness, sadness and
+chattiness (`widget/README.md`).
 Scheduled routines (morning plan, evening wind-down, weekly events) run only once you say yes.
 
 **What Donna won't do without your yes:** send or reply to anything, change events with guests,

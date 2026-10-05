@@ -1,10 +1,12 @@
 # Donna's desktop widget
 
-Donna on your desktop: her full figure on the left, changing with the moment (at her desk while you
-focus, on a call during meetings, arms crossed when you're late, laughing when you finish the day),
-with a close-up of her face beside it. On the right: her line in a speech bubble, what to do now
-with a countdown and the first step, what's next, today's timeline, what to wear and tonight's
-plans, and a chat box. A Settings tab tunes her personality.
+Donna on your desktop: she stands full height in the left corner, her pose changing with her mood
+(arms crossed when you're late, laughing when you finish the day). On the other side: her line in a
+speech bubble, what to do now with a countdown and the first step, what's next, today's timeline,
+what to wear and tonight's plans, and a chat box. In the bottom-right corner, a circle shows her
+mood with a close-up of her face and the word for it, its ring coloured by mood: gold when she's
+pleased, copper when amused, red when angry, grey-blue when sad. A Settings tab tunes her
+personality.
 
 It runs on Windows, macOS and Linux.
 
@@ -31,20 +33,15 @@ It runs on Windows, macOS and Linux.
 5. Optional: **Start at login**, and the live chat (below).
 
 Click ▁ for the slim bar and her face to come back. **Ctrl+Shift+D** (**Cmd+Shift+D** on a Mac) is
-discreet mode for screen sharing: figure and times only, chat hidden, notifications say only
+discreet mode for screen sharing: figure, mood and times only, chat hidden, notifications say only
 "Something needs you."
-
-## She moves
-
-Every picture is animated with a light mesh warp drawn by WebGL: she breathes, shifts her weight,
-tilts her head, her hair sways, and she nods while her line changes. The way she moves follows her
-mood: bouncier when laughing, stiff and shaking when furious, slower and lower when sad, head
-tilted when thoughtful. With reduced motion turned on in your system settings, she stays still.
 
 ## Her pictures
 
 The widget cuts each sheet into separate emotions and scenes and saves them in a `donna-cut` folder
-inside your pictures folder. Look there to check the cuts; replace any file with your own crop
+inside your pictures folder. Full figures and half busts drawn on plain paper are cut out of the
+paper (saved as PNG), so she stands on the widget itself rather than in a box; any that aren't on
+plain paper keep their background and fade softly into the widget instead. Look there to check the cuts; replace any file with your own crop
 (same name) and it's used next time. Re-cutting replaces that folder.
 
 | Sheet | What it gives her |
@@ -60,14 +57,17 @@ inside your pictures folder. Look there to check the cuts; replace any file with
 
 A single picture can be used whole for one emotion or scene ("One picture, used as…").
 
-**When she shows what.** In Auto, calm moments show the scene for the block (at work, on a call,
-lunch, coffee break, morning, winding down, exercise for anything like pickleball or the gym).
-Strong moments show emotion: late with high anger means arms crossed, and furious after 15 minutes
-if anger is 8 or more; late with sarcasm means amused; started late means cooling down; done means
-happy, laughing or playful; finishing the whole day with happiness at 9 or more means enchanted. With
-sadness at 8 or more, a skip or a long delay can bring tears. Missing pictures fall back to the
-nearest one (furious → angry → serious → normal). Full body, Half bust and Close-up fix the view;
-Off hides her and narrows the widget.
+**When she shows what.** Her mood comes from the moment and her dials: late with high anger means
+arms crossed, and furious after 15 minutes if anger is 8 or more; late with sarcasm means amused;
+started late means cooling down; done means happy, laughing or playful; finishing the whole day with
+happiness at 9 or more means enchanted. With sadness at 8 or more, a skip or a long delay can bring
+tears. The figure in the corner and the close-up in the circle both follow it. Missing pictures fall
+back to the nearest one (furious → angry → serious → normal).
+
+Settings → Look picks what stands in the corner: **Full body** (the default), **Scenes** (in calm
+moments, what she's doing: at work, on a call, lunch, coffee break, morning, winding down, exercise
+for anything like pickleball or the gym; her mood otherwise), **Half bust**, or **Off**, which hides
+her and narrows the widget to the plan, the chat and the mood circle.
 
 ## Personality
 
@@ -116,8 +116,7 @@ they weren't found, or start a fresh conversation.
 | `renderer/index.html`, `styles.css`, `app.js` | The widget |
 | `renderer/voice.js` | Her lines, chosen by temperament and dials |
 | `renderer/manifest.js` | Where each emotion and scene sits on each sheet; which scene fits which block |
-| `renderer/art.js` | Cuts the sheets and picks the picture for the moment |
-| `renderer/motion.js` | Animates her: breathing, weight shift, head tilt, hair, nods while she talks, motion by mood |
+| `renderer/art.js` | Cuts the sheets (and her figures out of the paper) and picks the picture for the moment |
 | `sample/today.json` | The demo day; also shows the format Donna writes |
 | `test/` | `npm test` |
 

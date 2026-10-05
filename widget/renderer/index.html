@@ -13,162 +13,164 @@
   <link rel="stylesheet" href="../node_modules/@fontsource/inter/500.css">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body data-mode="card" data-figure="auto">
+<body data-mode="card" data-figure="full">
   <main class="card" id="card">
-    <header class="head">
-      <button class="mini-face" id="face" type="button" title="Full view" aria-label="Full view"><span class="face-img" id="face-img"></span></button>
-      <div class="brand">
-        <h1>Donna</h1>
-        <p class="role">Executive assistant</p>
-      </div>
-      <div class="mini-now">
-        <p class="mini-title" id="mini-title"></p>
-        <p class="mini-meta" id="mini-meta"></p>
-      </div>
-      <nav class="tabs" role="tablist" aria-label="Views">
-        <button type="button" role="tab" id="tab-day" aria-selected="true" aria-controls="view-day">Day</button>
-        <button type="button" role="tab" id="tab-settings" aria-selected="false" aria-controls="view-settings">Settings</button>
-      </nav>
-      <div class="tools">
-        <button type="button" id="btn-discreet" title="Discreet mode (Ctrl+Shift+D)" aria-label="Discreet mode">◐</button>
-        <button type="button" id="btn-mini" title="Slim bar" aria-label="Slim bar">▁</button>
-        <button type="button" id="btn-quit" title="Quit Donna" aria-label="Quit">✕</button>
-      </div>
-    </header>
+    <figure class="stage" id="stage">
+      <img id="figure-img" alt="">
+      <p class="figure-empty" id="figure-empty">Add Donna's pictures in Settings → Look.</p>
+    </figure>
 
-    <section class="view view-day" id="view-day" role="tabpanel" aria-labelledby="tab-day">
-      <figure class="stage" id="stage">
-        <div class="frame" id="frame"><img id="figure-img" alt=""><canvas id="figure-canvas" aria-hidden="true"></canvas></div>
-        <p class="figure-empty" id="figure-empty">Add Donna's pictures in Settings → Look.</p>
-        <span class="badge"><span class="face-img" id="badge-img"></span></span>
-        <figcaption>
-          <span class="cap" id="figure-cap"></span>
-          <span class="motto">One step ahead.</span>
-        </figcaption>
-      </figure>
+    <div class="side">
+      <header class="head">
+        <button class="mini-face" id="face" type="button" title="Full view" aria-label="Full view"><span class="face-img" id="face-img"></span></button>
+        <div class="brand">
+          <h1>Donna</h1>
+          <p class="role">Executive assistant</p>
+        </div>
+        <div class="mini-now">
+          <p class="mini-title" id="mini-title"></p>
+          <p class="mini-meta" id="mini-meta"></p>
+        </div>
+        <nav class="tabs" role="tablist" aria-label="Views">
+          <button type="button" role="tab" id="tab-day" aria-selected="true" aria-controls="view-day">Day</button>
+          <button type="button" role="tab" id="tab-settings" aria-selected="false" aria-controls="view-settings">Settings</button>
+        </nav>
+        <div class="tools">
+          <button type="button" id="btn-discreet" title="Discreet mode (Ctrl+Shift+D)" aria-label="Discreet mode">◐</button>
+          <button type="button" id="btn-mini" title="Slim bar" aria-label="Slim bar">▁</button>
+          <button type="button" id="btn-quit" title="Quit Donna" aria-label="Quit">✕</button>
+        </div>
+      </header>
 
-      <div class="deck">
-        <p class="line private" id="line"></p>
+      <section class="view view-day" id="view-day" role="tabpanel" aria-labelledby="tab-day">
+        <div class="deck">
+          <p class="line private" id="line"></p>
 
-        <section class="now" id="now">
-          <div class="ring" id="ring">
-            <svg viewBox="0 0 100 100" aria-hidden="true">
-              <circle class="track" r="44" cx="50" cy="50"></circle>
-              <circle class="arc" id="arc" r="44" cx="50" cy="50"></circle>
-            </svg>
-            <span class="left" id="left">--</span>
-          </div>
-          <div class="now-text">
-            <p class="label"><span id="now-label">Now</span> <span id="now-time"></span></p>
-            <h2 class="private" id="now-title"></h2>
-            <p class="step private" id="now-step"></p>
-            <div class="actions">
-              <button type="button" class="primary" id="btn-start">I'm on it</button>
-              <button type="button" class="primary" id="btn-done">Done</button>
-              <button type="button" id="btn-snooze">+5 min</button>
-              <button type="button" id="btn-skip">Skip</button>
+          <section class="now" id="now">
+            <div class="ring" id="ring">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <circle class="track" r="44" cx="50" cy="50"></circle>
+                <circle class="arc" id="arc" r="44" cx="50" cy="50"></circle>
+              </svg>
+              <span class="left" id="left">--</span>
+            </div>
+            <div class="now-text">
+              <p class="label"><span id="now-label">Now</span> <span id="now-time"></span></p>
+              <h2 class="private" id="now-title"></h2>
+              <p class="step private" id="now-step"></p>
+              <div class="actions">
+                <button type="button" class="primary" id="btn-start">I'm on it</button>
+                <button type="button" class="primary" id="btn-done">Done</button>
+                <button type="button" id="btn-snooze">+5 min</button>
+                <button type="button" id="btn-skip">Skip</button>
+              </div>
+            </div>
+          </section>
+
+          <p class="next private" id="next"></p>
+
+          <section class="day">
+            <h3>Today</h3>
+            <ol class="timeline" id="timeline"></ol>
+          </section>
+
+          <section class="extras private" id="extras"></section>
+
+          <div class="dock">
+            <section class="chat" aria-label="Chat with Donna">
+              <ol class="messages private" id="messages" aria-live="polite"></ol>
+              <form class="composer" id="composer" autocomplete="off">
+                <textarea id="chat-text" rows="1" maxlength="4000" placeholder="Tell Donna…" aria-label="Message to Donna"></textarea>
+                <button type="submit" id="chat-send" aria-label="Send">→</button>
+              </form>
+              <p class="chat-note" id="chat-note"></p>
+            </section>
+            <div class="mood" id="mood" role="img" aria-label="Donna's mood">
+              <span class="mood-ring"><span class="face-img" id="mood-img"></span></span>
+              <span class="mood-word" id="mood-word"></span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="view view-settings" id="view-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+        <section class="group">
+          <h3>Personality</h3>
+          <div class="seg" id="set-temper" role="radiogroup" aria-label="Temperament">
+            <button type="button" role="radio" data-value="earned">Yours: late or doing well</button>
+            <button type="button" role="radio" data-value="angry">Always angry</button>
+            <button type="button" role="radio" data-value="classic">Classic</button>
+          </div>
+          <div class="dials" id="dials"></div>
+          <div class="hear">
+            <p><span class="k">Running late</span><span id="hear-late"></span></p>
+            <p><span class="k">Doing well</span><span id="hear-good"></span></p>
+            <button type="button" class="ghost" id="btn-hear">Another line</button>
+          </div>
         </section>
 
-        <p class="next private" id="next"></p>
-
-        <section class="day">
-          <h3>Today</h3>
-          <ol class="timeline" id="timeline"></ol>
+        <section class="group">
+          <h3>Look</h3>
+          <div class="seg" id="set-figure" role="radiogroup" aria-label="Figure">
+            <button type="button" role="radio" data-value="full">Full body</button>
+            <button type="button" role="radio" data-value="scenes">Scenes</button>
+            <button type="button" role="radio" data-value="bust">Half bust</button>
+            <button type="button" role="radio" data-value="off">Off</button>
+          </div>
+          <div class="row">
+            <div><p class="k">Pictures folder</p><p class="v" id="set-art">Not chosen</p></div>
+            <button type="button" id="btn-art">Choose…</button>
+          </div>
+          <p class="help">She stands in the corner; the circle by the chat shows her mood with a close-up. Scenes shows what she's doing (at her desk, on a call, lunch) when things are calm.</p>
+          <p class="help">Choose the folder with Donna's sheets (for example D:\Projects\Donna), say what each sheet is, then cut. The pieces are saved in a <b>donna-cut</b> folder inside it, where you can swap any of them.</p>
+          <ol class="files" id="files"></ol>
+          <div class="row">
+            <p class="v" id="cut-status"></p>
+            <button type="button" id="btn-cut">Cut pictures</button>
+          </div>
+          <ol class="slots" id="slots"></ol>
         </section>
 
-        <section class="extras private" id="extras"></section>
-
-        <section class="chat" aria-label="Chat with Donna">
-          <ol class="messages private" id="messages" aria-live="polite"></ol>
-          <form class="composer" id="composer" autocomplete="off">
-            <textarea id="chat-text" rows="1" maxlength="4000" placeholder="Tell Donna…" aria-label="Message to Donna"></textarea>
-            <button type="submit" id="chat-send" aria-label="Send">→</button>
-          </form>
-          <p class="chat-note" id="chat-note"></p>
+        <section class="group">
+          <h3>Chat</h3>
+          <p class="help" id="set-chat-note"></p>
+          <div class="seg" id="set-chat-mode" role="radiogroup" aria-label="Chat">
+            <button type="button" role="radio" data-value="auto">Live when available</button>
+            <button type="button" role="radio" data-value="inbox">Messages only</button>
+          </div>
+          <div class="row">
+            <div><p class="k">Claude Code</p><p class="v" id="set-claude">Not found</p></div>
+            <button type="button" id="btn-claude">Find…</button>
+          </div>
+          <div class="row">
+            <div><p class="k">Donna's files</p><p class="v" id="set-repo">Not found</p></div>
+            <button type="button" id="btn-repo">Choose…</button>
+          </div>
+          <div class="row">
+            <p class="v">Start over with a fresh conversation.</p>
+            <button type="button" id="btn-new-chat">New conversation</button>
+          </div>
         </section>
-      </div>
-    </section>
 
-    <section class="view view-settings" id="view-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
-      <section class="group">
-        <h3>Personality</h3>
-        <div class="seg" id="set-temper" role="radiogroup" aria-label="Temperament">
-          <button type="button" role="radio" data-value="earned">Yours: late or doing well</button>
-          <button type="button" role="radio" data-value="angry">Always angry</button>
-          <button type="button" role="radio" data-value="classic">Classic</button>
-        </div>
-        <div class="dials" id="dials"></div>
-        <div class="hear">
-          <p><span class="k">Running late</span><span id="hear-late"></span></p>
-          <p><span class="k">Doing well</span><span id="hear-good"></span></p>
-          <button type="button" class="ghost" id="btn-hear">Another line</button>
-        </div>
+        <section class="group">
+          <h3>Plan and desktop</h3>
+          <div class="row">
+            <div><p class="k">Plan folder</p><p class="v" id="set-folder">Not chosen</p></div>
+            <button type="button" id="btn-folder">Choose…</button>
+          </div>
+          <label class="row check"><span class="k">Always on top</span><input type="checkbox" id="set-top"></label>
+          <label class="row check"><span class="k">Start at login</span><input type="checkbox" id="set-login"></label>
+          <label class="row check"><span class="k">Chime on nudges</span><input type="checkbox" id="set-chime"></label>
+          <p class="help">Settings stay on this computer. The widget never goes online; the live chat runs Claude Code here, which can read and plan but never send, post or book from the widget.</p>
+        </section>
       </section>
-
-      <section class="group">
-        <h3>Look</h3>
-        <div class="seg" id="set-figure" role="radiogroup" aria-label="Figure">
-          <button type="button" role="radio" data-value="auto">Auto</button>
-          <button type="button" role="radio" data-value="full">Full body</button>
-          <button type="button" role="radio" data-value="bust">Half bust</button>
-          <button type="button" role="radio" data-value="close">Close-up</button>
-          <button type="button" role="radio" data-value="off">Off</button>
-        </div>
-        <div class="row">
-          <div><p class="k">Pictures folder</p><p class="v" id="set-art">Not chosen</p></div>
-          <button type="button" id="btn-art">Choose…</button>
-        </div>
-        <p class="help">Choose the folder with Donna's sheets (for example D:\Projects\Donna), say what each sheet is, then cut. The pieces are saved in a <b>donna-cut</b> folder inside it, where you can swap any of them.</p>
-        <ol class="files" id="files"></ol>
-        <div class="row">
-          <p class="v" id="cut-status"></p>
-          <button type="button" id="btn-cut">Cut pictures</button>
-        </div>
-        <ol class="slots" id="slots"></ol>
-      </section>
-
-      <section class="group">
-        <h3>Chat</h3>
-        <p class="help" id="set-chat-note"></p>
-        <div class="seg" id="set-chat-mode" role="radiogroup" aria-label="Chat">
-          <button type="button" role="radio" data-value="auto">Live when available</button>
-          <button type="button" role="radio" data-value="inbox">Messages only</button>
-        </div>
-        <div class="row">
-          <div><p class="k">Claude Code</p><p class="v" id="set-claude">Not found</p></div>
-          <button type="button" id="btn-claude">Find…</button>
-        </div>
-        <div class="row">
-          <div><p class="k">Donna's files</p><p class="v" id="set-repo">Not found</p></div>
-          <button type="button" id="btn-repo">Choose…</button>
-        </div>
-        <div class="row">
-          <p class="v">Start over with a fresh conversation.</p>
-          <button type="button" id="btn-new-chat">New conversation</button>
-        </div>
-      </section>
-
-      <section class="group">
-        <h3>Plan and desktop</h3>
-        <div class="row">
-          <div><p class="k">Plan folder</p><p class="v" id="set-folder">Not chosen</p></div>
-          <button type="button" id="btn-folder">Choose…</button>
-        </div>
-        <label class="row check"><span class="k">Always on top</span><input type="checkbox" id="set-top"></label>
-        <label class="row check"><span class="k">Start at login</span><input type="checkbox" id="set-login"></label>
-        <label class="row check"><span class="k">Chime on nudges</span><input type="checkbox" id="set-chime"></label>
-        <p class="help">Settings stay on this computer. The widget never goes online; the live chat runs Claude Code here, which can read and plan but never send, post or book from the widget.</p>
-      </section>
-    </section>
+    </div>
 
     <p class="discreet-note">Discreet mode · Ctrl+Shift+D to show</p>
   </main>
   <script src="voice.js"></script>
   <script src="manifest.js"></script>
   <script src="art.js"></script>
-  <script src="motion.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

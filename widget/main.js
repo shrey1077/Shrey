@@ -17,12 +17,13 @@ const Voice = require('./renderer/voice');
 const Manifest = require('./renderer/manifest');
 
 const DEFAULTS = {
-  feedFolder: '', artFolder: '', sheets: {}, sheet: '', mode: 'card', figure: 'auto',
+  feedFolder: '', artFolder: '', sheets: {}, sheet: '', mode: 'card', figure: 'full',
   temperament: 'earned', dials: { ...Voice.DEFAULT_DIALS },
   chat: { mode: 'auto', claudePath: '', repoPath: '', sessionId: '' },
   alwaysOnTop: true, startAtLogin: false, chime: true, warnings: [10, 2], position: null,
 };
-const FIGURES = new Set(['auto', 'full', 'bust', 'close', 'off']);
+const FIGURES = new Set(['full', 'scenes', 'bust', 'off']);
+const OLD_FIGURES = { auto: 'scenes', close: 'full' }; // earlier versions' choices
 const TEMPERS = new Set(['earned', 'angry', 'classic']);
 const ACTIONS = new Set(['start', 'done', 'snooze', 'skip', 'undo']);
 const IMAGE_EXT = /\.(png|jpe?g|webp)$/i;
@@ -48,6 +49,7 @@ function loadConfig() {
     const saved = JSON.parse(fs.readFileSync(configPath(), 'utf8'));
     config = { ...DEFAULTS, ...saved, chat: { ...DEFAULTS.chat, ...(saved.chat || {}) } };
     config.dials = Voice.clampDials(config.dials);
+    config.figure = OLD_FIGURES[config.figure] || (FIGURES.has(config.figure) ? config.figure : DEFAULTS.figure);
   } catch {
     config = { ...DEFAULTS, chat: { ...DEFAULTS.chat } };
   }
