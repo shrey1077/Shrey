@@ -1,7 +1,7 @@
 # Donna's desktop widget
 
-Donna on your desktop: she stands full height in the left corner, her pose changing with her mood
-(arms crossed when you're late, laughing when you finish the day). On the other side: her line in a
+Donna on your desktop: a tall panel of her stands in the left corner, cut as a rectangle from your
+sheets, changing with her mood (arms crossed when you're late, laughing when you finish the day). On the other side: her line in a
 speech bubble, what to do now with a countdown and the first step, what's next, today's timeline,
 what to wear and tonight's plans, and a chat box. In the bottom-right corner, a circle shows her
 mood with a close-up of her face and the word for it, its ring coloured by mood: gold when she's
@@ -39,9 +39,9 @@ discreet mode for screen sharing: figure, mood and times only, chat hidden, noti
 ## Her pictures
 
 The widget cuts each sheet into separate emotions and scenes and saves them in a `donna-cut` folder
-inside your pictures folder. Full figures and half busts drawn on plain paper are cut out of the
-paper (saved as PNG), so she stands on the widget itself rather than in a box; any that aren't on
-plain paper keep their background and fade softly into the widget instead. Look there to check the cuts; replace any file with your own crop
+inside your pictures folder. Every piece is a plain rectangle of the sheet, background and all: the
+cutter finds the white gutters between panels, so the tall full-body panels come out as they're
+drawn and stand in the corner in a thin gold frame. Look there to check the cuts; replace any file with your own crop
 (same name) and it's used next time. Re-cutting replaces that folder.
 
 | Sheet | What it gives her |
@@ -53,7 +53,7 @@ plain paper keep their background and fade softly into the widget instead. Look 
 | Intense emotions | Cold anger, fury, crying, sobbing, cooling down: full figures and close-ups |
 | Gig night | Evening events, celebrating, relaxed close-ups |
 | Office emotions | Normal, happy, amused, surprised, thoughtful |
-| Character sheet | Turnaround (cut out from the paper), in-action poses, the eight expressions |
+| Character sheet | The front view from the turnaround, in-action poses, the eight expressions |
 
 A single picture can be used whole for one emotion or scene ("One picture, used as…").
 
@@ -116,7 +116,7 @@ they weren't found, or start a fresh conversation.
 | `renderer/index.html`, `styles.css`, `app.js` | The widget |
 | `renderer/voice.js` | Her lines, chosen by temperament and dials |
 | `renderer/manifest.js` | Where each emotion and scene sits on each sheet; which scene fits which block |
-| `renderer/art.js` | Cuts the sheets (and her figures out of the paper) and picks the picture for the moment |
+| `renderer/art.js` | Cuts the sheets into rectangles and picks the picture for the moment |
 | `sample/today.json` | The demo day; also shows the format Donna writes |
 | `test/` | `npm test` |
 

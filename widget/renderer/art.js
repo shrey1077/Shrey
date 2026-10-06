@@ -116,177 +116,17 @@ const Art = (() => {
     return runs.map(([a, b]) => [a + 2, top + 2, b - a - 4, bottom - top - 4]);
   }
 
-  // Make the paper around a figure transparent, starting from the edges so a white blouse stays.
-  // Applied only when at least `min` of the picture's edge is paper; returns whether it was. With
-  // `pockets`, paper trapped inside the outline goes too (full figures only).
-  function keyPaper(ctx, w, h, min = 0, pockets = false) {
-    const img = ctx.getImageData(0, 0, w, h);
-    const d = img.data;
-    const seen = new Uint8Array(w * h);
-    const stack = [];
-    for (let x = 0; x < w; x += 1) stack.push(x, (h - 1) * w + x);
-    for (let y = 0; y < h; y += 1) stack.push(y * w, y * w + w - 1);
-    while (stack.length) {
-      const p = stack.pop();
-      if (seen[p]) continue;
-      seen[p] = 1;
-      if (!paper(d, p * 4)) continue;
-      d[p * 4 + 3] = 0;
-      const x = p % w;
-      if (x > 0) stack.push(p - 1);
-      if (x < w - 1) stack.push(p + 1);
-      if (p >= w) stack.push(p - w);
-      if (p < w * (h - 1)) stack.push(p + w);
-    }
-    let rim = 0;
-    let cleared = 0;
-    for (let x = 0; x < w; x += 1) {
-      rim += 2;
-      cleared += (d[x * 4 + 3] === 0) + (d[((h - 1) * w + x) * 4 + 3] === 0);
-    }
-    for (let y = 1; y < h - 1; y += 1) {
-      rim += 2;
-      cleared += (d[y * w * 4 + 3] === 0) + (d[(y * w + w - 1) * 4 + 3] === 0);
-    }
-    if (cleared / rim < min) return false;
-    if (pockets) clearPockets(d, w, h);
-    // Soften the rim: paper-tinted pixels along the edge either go or take the colour of the figure
-    // just inside them, so no light halo shows against the dark card.
-    for (let pass = 0; pass < 2; pass += 1) {
-      const clear = new Uint8Array(w * h);
-      for (let p = 0; p < w * h; p += 1) clear[p] = d[p * 4 + 3] < 128 ? 1 : 0;
-      const rim = new Uint8Array(w * h);
-      const rims = [];
-      for (let p = 0; p < w * h; p += 1) {
-        if (clear[p]) continue;
-        const x = p % w;
-        if ((x > 0 && clear[p - 1]) || (x < w - 1 && clear[p + 1]) || (p >= w && clear[p - w]) || (p < w * (h - 1) && clear[p + w])) {
-          rim[p] = 1;
-          rims.push(p);
-        }
-      }
-      for (const p of rims) {
-        const i = p * 4;
-        const lum = (d[i] + d[i + 1] + d[i + 2]) / 3;
-        if (lum <= 150) continue;
-        if (lum > 215 && Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]) < 40) {
-          d[i + 3] = 0;
-          continue;
-        }
-        const x = p % w;
-        const y = (p - x) / w;
-        let r = 0;
-        let g = 0;
-        let b = 0;
-        let n = 0;
-        for (let yy = Math.max(0, y - 2); yy <= Math.min(h - 1, y + 2); yy += 1) {
-          for (let xx = Math.max(0, x - 2); xx <= Math.min(w - 1, x + 2); xx += 1) {
-            const q = yy * w + xx;
-            if (clear[q] || rim[q] || d[q * 4 + 3] < 250) continue;
-            r += d[q * 4];
-            g += d[q * 4 + 1];
-            b += d[q * 4 + 2];
-            n += 1;
-          }
-        }
-        if (!n) {
-          d[i + 3] = 0;
-          continue;
-        }
-        d[i] = r / n;
-        d[i + 1] = g / n;
-        d[i + 2] = b / n;
-        d[i + 3] = Math.min(d[i + 3], 160);
-      }
-    }
-    dropSpecks(d, w, h);
-    ctx.putImageData(img, 0, 0);
-    return true;
-  }
-
-  // Paper trapped between an arm and the body: patches that match the cleared paper's colour
-  // closely (her blouse and skin are warmer, so they stay). Her head, at the top of the picture, is
-  // left alone so the whites of her eyes stay.
-  function clearPockets(d, w, h) {
-    const top = Math.round(h * 0.18) * w;
-    const avg = [0, 0, 0];
-    let n = 0;
-    for (let p = 0; p < w * h; p += 1) {
-      if (d[p * 4 + 3] !== 0) continue;
-      for (let c = 0; c < 3; c += 1) avg[c] += d[p * 4 + c];
-      n += 1;
-    }
-    if (!n) return;
-    for (let c = 0; c < 3; c += 1) avg[c] /= n;
-    const near = (p) => p >= top && d[p * 4 + 3] !== 0 && Math.max(...[0, 1, 2].map((c) => Math.abs(d[p * 4 + c] - avg[c]))) < 14;
-    const seen = new Uint8Array(w * h);
-    for (let start = 0; start < w * h; start += 1) {
-      if (seen[start] || !near(start)) continue;
-      const patch = [start];
-      seen[start] = 1;
-      for (let k = 0; k < patch.length; k += 1) {
-        const p = patch[k];
-        const x = p % w;
-        for (const q of [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, p >= w ? p - w : -1, p < w * (h - 1) ? p + w : -1]) {
-          if (q >= 0 && !seen[q] && near(q)) {
-            seen[q] = 1;
-            patch.push(q);
-          }
-        }
-      }
-      if (patch.length >= 6) for (const p of patch) d[p * 4 + 3] = 0;
-    }
-  }
-
-  // Labels, signatures and stray marks left floating on the cleared paper go too; the figure's own
-  // pieces (a bag, a cup, a strand of hair) are kept.
-  function dropSpecks(d, w, h) {
-    const label = new Int32Array(w * h);
-    const sizes = [0];
-    const stack = [];
-    for (let start = 0; start < w * h; start += 1) {
-      if (label[start] || d[start * 4 + 3] === 0) continue;
-      const id = sizes.length;
-      let n = 0;
-      label[start] = id;
-      stack.push(start);
-      while (stack.length) {
-        const p = stack.pop();
-        n += 1;
-        const x = p % w;
-        const visit = (q) => {
-          if (!label[q] && d[q * 4 + 3] !== 0) {
-            label[q] = id;
-            stack.push(q);
-          }
-        };
-        if (x > 0) visit(p - 1);
-        if (x < w - 1) visit(p + 1);
-        if (p >= w) visit(p - w);
-        if (p < w * (h - 1)) visit(p + w);
-      }
-      sizes.push(n);
-    }
-    const keep = sizes.reduce((a, b) => Math.max(a, b), 0) * 0.03;
-    for (let p = 0; p < w * h; p += 1) if (label[p] && sizes[label[p]] < keep) d[p * 4 + 3] = 0;
-  }
-
-  function crop(px, [x, y, w, h], opts = {}) {
+  // A rectangle of the sheet, as drawn (background and all), scaled down.
+  function crop(px, [x, y, w, h]) {
     const scale = Math.min(1, MAX_H / h);
     const c = document.createElement('canvas');
     c.width = Math.max(1, Math.round(w * scale));
     c.height = Math.max(1, Math.round(h * scale));
-    const ctx = c.getContext('2d', { willReadFrequently: Boolean(opts.key) });
+    const ctx = c.getContext('2d');
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(px.canvas, x, y, w, h, 0, 0, c.width, c.height);
-    // Sheets marked to key are always cut out; figures elsewhere are when they stand on plain paper.
-    const keyed = (opts.key === 'paper' || opts.tryKey)
-      && keyPaper(ctx, c.width, c.height, opts.key === 'paper' ? 0 : 0.6, opts.pockets);
-    return { url: keyed ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.9), cutout: Boolean(keyed) };
+    return { url: c.toDataURL('image/jpeg', 0.9), cutout: false };
   }
-
-  const standing = (slot) => slot.startsWith('body.') || slot === 'bust';
-  const fullFigure = (slot) => slot.startsWith('body.');
 
   // Cut one sheet. `type` is a key of Manifest.SHEETS. Returns [{ slot, url, cutout }].
   async function cutSheet(url, type) {
@@ -303,10 +143,10 @@ const Art = (() => {
       if (found && slot.startsWith('face.')) {
         r = found[face];
         face += 1;
-      } else if (!opts.key) {
+      } else if (!opts.exact) {
         r = snap(px, r);
       }
-      out.push({ slot, ...crop(px, r, { ...opts, tryKey: standing(slot), pockets: fullFigure(slot) }) });
+      out.push({ slot, ...crop(px, r) });
     }
     return out;
   }
@@ -320,7 +160,7 @@ const Art = (() => {
     c.height = Math.max(1, Math.round(img.naturalHeight * scale));
     const ctx = c.getContext('2d', { willReadFrequently: true });
     ctx.drawImage(img, 0, 0, c.width, c.height);
-    const cutout = ctx.getImageData(0, 0, 1, 1).data[3] < 250 || (standing(slot) && keyPaper(ctx, c.width, c.height, 0.6, fullFigure(slot)));
+    const cutout = ctx.getImageData(0, 0, 1, 1).data[3] < 250;
     return { slot, url: cutout ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.9), cutout };
   }
 

@@ -163,13 +163,12 @@
     return body() || bust();
   }
 
-  // As tall as the corner allows, feet on the floor; small pieces are enlarged at most twice.
+  // As tall as the corner allows, keeping the panel's shape; small pieces are enlarged at most twice.
   function fitFigure() {
     const img = $('figure-img');
     const stage = $('stage');
-    const framed = stage.classList.contains('framed');
-    const w = stage.clientWidth - (framed ? 0 : 12);
-    const h = stage.clientHeight - (framed ? 0 : 18);
+    const w = stage.clientWidth - 26;
+    const h = stage.clientHeight - 28;
     if (!img.naturalWidth || w <= 0 || h <= 0) return;
     const k = Math.min(2, w / img.naturalWidth, h / img.naturalHeight);
     img.style.width = `${Math.round(img.naturalWidth * k)}px`;
@@ -184,7 +183,7 @@
     if (item && img.dataset.url !== item.url) {
       img.dataset.url = item.url;
       img.src = item.url;
-      $('stage').classList.toggle('framed', !item.cutout);
+      $('stage').classList.toggle('cutout', Boolean(item.cutout));
     } else if (!item && img.dataset.url) {
       img.removeAttribute('src');
       img.dataset.url = '';

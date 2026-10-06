@@ -1,8 +1,10 @@
 'use strict';
 // Where each emotion and scene sits on Donna's art sheets, and which picture to show when.
 //
-// Rectangles are [x, y, width, height] on a 1536x1024 sheet (scaled to the real size). The cutter
-// snaps each edge to the white gutter between panels, so these only need to be close. Slots:
+// Rectangles are [x, y, width, height] on a 1536x1024 sheet (scaled to the real size). Each piece is
+// a plain rectangle of the sheet, background and all. The cutter snaps each edge to the white gutter
+// between panels, so these only need to be close; `exact` ones (a figure on open paper, not in a
+// panel) are cut where they are. Slots:
 //   body.<emotion>  full or three-quarter figure      face.<emotion>  close-up
 //   scene.<moment>  Donna doing something             bust            half-bust portrait
 // A slot can hold several pictures; the widget rotates through them for variety.
@@ -68,7 +70,7 @@ const Manifest = (() => {
     character: {
       label: 'Character sheet (turnaround, in action, expressions)',
       cuts: [
-        ['body.normal', [472, 32, 124, 466], { key: 'paper' }], ['scene.focus', [833, 50, 173, 447]],
+        ['body.normal', [472, 32, 117, 466], { exact: true }], ['scene.focus', [833, 50, 173, 447]],
         ['scene.reading', [1009, 0, 176, 497]], ['scene.call', [1188, 0, 172, 497]], ['scene.coffee', [1362, 0, 174, 497]],
         ['bust', [150, 90, 316, 610]],
         // The EXPRESSIONS row; the widget also finds these panels by itself.
