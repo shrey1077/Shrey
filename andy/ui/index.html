@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Only Andy's own script may run. No remote code, no network calls, no inline handlers. pywebview's bridge needs eval. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-{{NONCE}}' 'unsafe-eval'; style-src 'unsafe-inline'; img-src data:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Andy</title>
+<style>/*{{CSS}}*/</style>
+</head>
+<body>
+<div class="field" aria-hidden="true"></div>
+<main id="app" aria-live="polite"></main>
+<template id="logo-tpl"><!--{{LOGO}}--></template>
+<script nonce="{{NONCE}}">/*{{JS}}*/</script>
+</body>
+</html>

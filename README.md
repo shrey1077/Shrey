@@ -1,7 +1,17 @@
-# Personal CA and financial advisor
+# Andy
 
-A Claude Code agent that works as Shrey's own Chartered Accountant and financial advisor, built for
-Indian tax and personal finance. Open a Claude Code session on this repository (web, desktop, mobile
+Shrey's personal Chartered Accountant and financial advisor, in two parts:
+
+- **The Andy desktop app** ([`andy/`](andy/README.md)): a secure, local-only Windows app. It tracks
+  every expense from your bank, card and UPI alert emails, day by day, monthly and yearly. It
+  suggests where to cut back, keeps My info and your tax status, and puts Donna's spending requests
+  in front of you for the final call. Read [how it's protected](andy/SECURITY.md).
+- **The Andy agent** in Claude Code, described below: your CA for tax questions, returns, notices
+  and planning.
+
+## The agent
+
+Built for Indian tax and personal finance. Open a Claude Code session on this repository (web, desktop, mobile
 or terminal) and talk to it the way you would talk to your CA:
 
 - "Old or new regime for me this year?"
@@ -23,7 +33,7 @@ or terminal) and talk to it the way you would talk to your CA:
 | `/goal-plan` | Goals turned into SIPs with asset allocation and a glide path; retirement corpus |
 | `/notice` | Explains an income-tax notice, checks it against your return, drafts the reply |
 
-You can also delegate to the `ca-advisor` subagent from any other task in this repository.
+You can also delegate to the `andy` subagent from any other task in this repository.
 
 ## How it works
 
@@ -41,7 +51,7 @@ You can also delegate to the `ca-advisor` subagent from any other task in this r
   - `advance_tax.py`: instalment schedule and 234B/234C interest
   - `planner.py`: SIP, lump sum, goal, retirement, EMI with prepayment, emergency fund, term
     cover, FD, real return, CAGR, XIRR
-- `tests/` has hand-checked cases. Run `python3 -m unittest discover -s tests`.
+- `tests/` has hand-checked cases for the calculators and the Andy app. Run `python3 -m unittest discover -s tests`.
 
 ```sh
 python3 tools/income_tax.py --salary 1800000 --basic-da 720000 --hra-received 288000 \

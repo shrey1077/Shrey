@@ -1,0 +1,14 @@
+<svg class="logo-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Andy">
+  <defs>
+    <linearGradient id="andy-iris" x1="6" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8FF3FF"/>
+      <stop offset="0.55" stop-color="#B9A4FF"/>
+      <stop offset="1" stop-color="#FFD8A8"/>
+    </linearGradient>
+  </defs>
+  <path d="M50.38 13.62A26 26 0 1 1 38.73 6.89" fill="none" stroke="url(#andy-iris)" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="45" cy="9.48" r="2.7" fill="#FFD8A8"/>
+  <path d="M19.5 47L32 15.5L44.5 47" fill="none" stroke="#E9EEF8" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="32" cy="33.6" r="3.3" fill="url(#andy-iris)"/>
+  <path d="M30.55 35.6L29.7 41.6H34.3L33.45 35.6Z" fill="url(#andy-iris)"/>
+</svg>
